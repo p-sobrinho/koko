@@ -1,17 +1,17 @@
 package net.koji.arc_steam.common.events
 
 import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.common.skills.SkillModel
-import net.koji.arc_steam.registry.AttachmentsRegistry
-import net.koji.arc_steam.registry.KeyRegistry
-import net.koji.arc_steam.registry.SkillRegistry
+import net.koji.arc_steam.common.registry.AttachmentsRegistry
+import net.koji.arc_steam.common.registry.DatapackRegistry.SKILL_REGISTRY
+import net.koji.arc_steam.common.registry.KeyRegistry
+import net.koji.arc_steam.common.SkillsHandler
 import net.minecraft.client.Minecraft
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.client.event.ClientTickEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.level.BlockEvent
-import net.neoforged.neoforge.registries.DataPackRegistryEvent
+import net.neoforged.neoforge.event.server.ServerStartedEvent
 
 @EventBusSubscriber(modid = ArcaneSteam.MOD_ID)
 object GeneralEventHandler {
@@ -24,6 +24,8 @@ object GeneralEventHandler {
         LOGGER.info("{} joined the game", player.name)
 
         val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
+
+        SkillsHandler.syncNewSkills(player.level(), playerSkills)
 
         LOGGER.info("{} has skills level at:", player.name)
 
@@ -46,6 +48,7 @@ object GeneralEventHandler {
     fun onClientTick(event: ClientTickEvent.Post) {
         while (KeyRegistry.OPEN_SKILLS.consumeClick()) {
             val mc = Minecraft.getInstance()
+            val level = mc.level ?: return
 
             val player = mc.player ?: return
 
@@ -53,14 +56,15 @@ object GeneralEventHandler {
 
             LOGGER.info("{} has skills level at:", player.getName())
 
-            playerSkills.getAllSkills().forEach { (a, b) ->
-
-                LOGGER.info("{} at {}", a.toString(), playerSkills.getLevel(a))
+            SkillsHandler.getSkillsModels(player).forEach { skill ->
+                print("SKILL DETECTED")
+                println(skill.key)
+                println(skill.value)
             }
 
-            //for (model in SkillRegistry.getAllAvailableSkills()) {
-                //LOGGER.info("{} - {}", model.key.registry(), model.value.toString())
-            //}
+            playerSkills.getAllSkills().forEach { (a, b) ->
+                LOGGER.info("{} at {}", a.toString(), SkillsHandler.getLevel(player, a))
+            }
         }
     }
 }

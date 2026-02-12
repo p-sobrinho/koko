@@ -1,14 +1,14 @@
-package net.koji.arc_steam.network.payloads
+package net.koji.arc_steam.common.network.payloads
 
 import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.common.skills.SkillData
+import net.koji.arc_steam.common.models.SkillData
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.resources.ResourceLocation
 
-class SyncSkillsPayload(val skillData: MutableMap<ResourceLocation, SkillData>) : CustomPacketPayload {
+class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : CustomPacketPayload {
     companion object {
         val ID: ResourceLocation = ArcaneSteam.namespacePath("skills_payload")
         val STREAM_CODEC = StreamCodec.of<RegistryFriendlyByteBuf, SyncSkillsPayload>(

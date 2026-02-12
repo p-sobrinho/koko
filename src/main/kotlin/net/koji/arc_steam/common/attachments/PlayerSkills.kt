@@ -2,11 +2,10 @@ package net.koji.arc_steam.common.attachments
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.common.skills.SkillData
-import net.koji.arc_steam.registry.SkillRegistry
+import net.koji.arc_steam.common.models.SkillData
+import net.koji.arc_steam.common.SkillsHandler
+import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
-import net.neoforged.neoforge.capabilities.EntityCapability
 import org.jetbrains.annotations.ApiStatus
 
 class PlayerSkills {
@@ -31,53 +30,37 @@ class PlayerSkills {
         return skillsData.getValue(skill)
     }
 
-    fun getLevel(skill: ResourceLocation): Int {
-        val skillData = getSkill(skill)
-        val skillModel = SkillRegistry.getSkill(skill)
-
-        val xp = skillData.xp
-        val maxLevel = if (skillData.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
-        var total = 0
-
-        for (level in 1..maxLevel) {
-            total += this.xpToLevelUp(level)
-
-            if (xp < total) {
-                return level
-            }
-        }
-
-        return maxLevel
-    }
-
-    fun getXp(skill: ResourceLocation): Int {
-        return getSkill(skill).xp
-    }
-
-    fun getAllSkills() = skillsData
-
-    fun isOverclocked(skill: ResourceLocation): Boolean {
-        return this.getSkill(skill).isOverClocked
-    }
+    fun getAllSkills(): Map<ResourceLocation, SkillData> = skillsData
 
     @ApiStatus.Internal
     fun addXp(skill: ResourceLocation, amount: Int) {
-        getSkill(skill).xp = this.getXp(skill) + amount
+        val skillData = getSkill(skill)
+
+        skillData.xp += amount
     }
 
     @ApiStatus.Internal
     fun removeXp(skill: ResourceLocation, amount: Int) {
-        getSkill(skill).xp = this.getXp(skill) - amount
+        val skillData = getSkill(skill)
+
+        skillData.xp += amount
     }
 
     @ApiStatus.Internal
-    fun replace(newSkillsData: MutableMap<ResourceLocation, SkillData>) {
+    fun replace(newSkillsData: Map<ResourceLocation, SkillData>) {
         skillsData.clear()
 
+        println("Received new data from server.$newSkillsData")
         skillsData.putAll(newSkillsData)
     }
 
-    private fun xpToLevelUp(level: Int): Int {
-        return (100 + level * 25)
+    fun put(skill: ResourceLocation, data: SkillData) {
+        skillsData[skill] = data
+    }
+
+    fun putIfAbsent(skill: ResourceLocation, data: SkillData) {
+        if (skillsData[skill] != null) return;
+
+        put(skill, data)
     }
 }

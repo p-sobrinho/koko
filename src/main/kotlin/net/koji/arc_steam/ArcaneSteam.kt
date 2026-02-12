@@ -1,15 +1,14 @@
 package net.koji.arc_steam
 
 import com.mojang.logging.LogUtils
-import net.koji.arc_steam.common.events.GeneralEventHandler
-import net.koji.arc_steam.registry.AttachmentsRegistry
+import net.koji.arc_steam.common.registry.AttachmentsRegistry
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
 
 @Mod(ArcaneSteam.MOD_ID)
-class ArcaneSteam(modEventBus: IEventBus, modContainer: ModContainer) {
+class ArcaneSteam {
     companion object {
         const val MOD_ID = "arcane_steam"
         val LOGGER = LogUtils.getLogger()
@@ -19,7 +18,8 @@ class ArcaneSteam(modEventBus: IEventBus, modContainer: ModContainer) {
         }
     }
 
-    init {
+    constructor(modEventBus: IEventBus, modContainer: ModContainer) {
+
         LOGGER.info("ArcaneSteam is loading...")
 
         AttachmentsRegistry.register(modEventBus)

@@ -1,4 +1,4 @@
-package net.koji.arc_steam.registry
+package net.koji.arc_steam.common.registry
 
 import net.koji.arc_steam.ArcaneSteam
 import net.koji.arc_steam.common.attachments.PlayerSkills

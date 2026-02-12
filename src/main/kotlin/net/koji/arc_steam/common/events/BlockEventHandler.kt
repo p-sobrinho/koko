@@ -1,8 +1,9 @@
 package net.koji.arc_steam.common.events
 
 import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.network.payloads.SyncSkillPayload
-import net.koji.arc_steam.registry.AttachmentsRegistry
+import net.koji.arc_steam.common.SkillsHandler
+import net.koji.arc_steam.common.network.payloads.SyncSkillPayload
+import net.koji.arc_steam.common.registry.AttachmentsRegistry
 import net.minecraft.server.level.ServerPlayer
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
@@ -19,16 +20,6 @@ object BlockEventHandler {
 
         LOGGER.info("{} breaked a block", player.name)
 
-        val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
-
-        val miningResource = ArcaneSteam.namespacePath("mining")
-
-        playerSkills.addXp(miningResource, 10)
-
-        PacketDistributor.sendToPlayer(
-            player, SyncSkillPayload(
-                miningResource, playerSkills.getXp(miningResource), playerSkills.isOverclocked(miningResource)
-            )
-        )
+        SkillsHandler.addXp(player, ArcaneSteam.namespacePath("mining"), 10)
     }
 }
