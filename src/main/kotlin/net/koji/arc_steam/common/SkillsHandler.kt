@@ -1,8 +1,10 @@
 package net.koji.arc_steam.common
 
+import net.koji.arc_steam.ArcaneSteam
 import net.koji.arc_steam.common.attachments.PlayerSkills
 import net.koji.arc_steam.common.models.SkillData
 import net.koji.arc_steam.common.models.SkillModel
+import net.koji.arc_steam.common.models.sources.SkillSource
 import net.koji.arc_steam.common.network.payloads.SyncSkillPayload
 import net.koji.arc_steam.common.network.payloads.SyncSkillsPayload
 import net.koji.arc_steam.common.registry.AttachmentsRegistry
@@ -16,29 +18,30 @@ import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.network.PacketDistributor
-import java.util.HashMap
-import java.util.UUID
+import java.util.*
 
 @EventBusSubscriber
 object SkillsHandler {
+    private val LOGGER = ArcaneSteam.LOGGER
     private val playerSkillsCache = HashMap<UUID, PlayerSkills>()
 
     fun syncNewSkills(level: Level, playerSkills: PlayerSkills) {
         val skillModels = getSkillsModels(level)
 
         for (entry in skillModels) {
-            playerSkills.putIfAbsent(entry.key.location(), SkillData(entry.value.defaultLevel, false))
+            playerSkills.putIfAbsent(entry.key.location(), SkillData(entry.value.defaultXp, false))
         }
     }
 
-    fun addXp(player: Player, skill: ResourceLocation, amount: Int) {
+    fun updateXp(player: Player, skill: ResourceLocation, amount: Double) {
         if (player.level().isClientSide) return;
 
-        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { ignored ->
+        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { _ ->
             player.getData(AttachmentsRegistry.PLAYER_SKILLS)
         }
 
-        playerSkills.addXp(skill, amount)
+        LOGGER.info("Updating {} xp from skill {} to {}.", player.name, skill, amount)
+        playerSkills.updateXp(skill, amount)
 
         val playerSkill = playerSkills.getSkill(skill)
 
@@ -46,25 +49,10 @@ object SkillsHandler {
             player as ServerPlayer, SyncSkillPayload(skill, playerSkill)
         )
     }
-
-    fun removeXp(player: Player, skill: ResourceLocation, amount: Int) {
-        if (player.level().isClientSide) return;
-
-        val playerSkills = playerSkillsCache
-            .computeIfAbsent(player.getUUID()) { u: UUID -> player.getData(AttachmentsRegistry.PLAYER_SKILLS) }
-
-        playerSkills.removeXp(skill, amount)
-
-        val playerSkill = playerSkills.getSkill(skill)
-
-        PacketDistributor.sendToPlayer(
-            player as ServerPlayer, SyncSkillPayload(skill, playerSkill)
-        )
-    }
-
-    fun getSkills(player: Player): PlayerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
 
     fun getSkill(player: Player, skill: ResourceLocation) = this.getSkills(player).getSkill(skill)
+
+    fun getSkills(player: Player): PlayerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
 
     fun getLevel(player: Player, skill: ResourceLocation): Int {
         val skills = this.getSkills(player)
@@ -104,6 +92,18 @@ object SkillsHandler {
         return registry.entrySet()
     }
 
+    fun getListenersFor(skillSourceType: String, level: Level): Set<SkillModelSourceListener> {
+        val skillsModels = getSkillsModels(level).asSequence()
+            .flatMap { (key, model) ->
+                model.skillSources.asSequence()
+                    .filter { it.type == skillSourceType }
+                    .map { SkillModelSourceListener(key.location(), it) }
+            }.toSet()
+
+
+        return skillsModels
+    }
+
     fun replaceSkill(player: Player, skill: ResourceLocation, data: SkillData) {
         val playerSkills = this.getSkills(player)
 
@@ -131,7 +131,7 @@ object SkillsHandler {
         // Making sure that player will never be a LocalPlayer
         if (player.level().isClientSide) return
 
-        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { u ->
+        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { _ ->
             player.getData(AttachmentsRegistry.PLAYER_SKILLS)
         }
 
@@ -141,4 +141,6 @@ object SkillsHandler {
     private fun xpToLevelUp(level: Int): Int {
         return (100 + level * 25)
     }
+
+    data class SkillModelSourceListener(val skill: ResourceLocation, val sourceData: SkillSource)
 }

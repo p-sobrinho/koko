@@ -13,6 +13,7 @@ object DatapackRegistry {
     val SKILL_REGISTRY: ResourceKey<Registry<SkillModel>> =
         ResourceKey.createRegistryKey(ArcaneSteam.namespacePath("skills"))
 
+
     @SubscribeEvent
     fun register(event: DataPackRegistryEvent.NewRegistry) {
         event.dataPackRegistry(

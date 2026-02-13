@@ -1,14 +1,13 @@
 package net.koji.arc_steam.common.network
 
 import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.common.network.payloads.SyncSkillsPayload
 import net.koji.arc_steam.common.SkillsHandler
 import net.koji.arc_steam.common.network.payloads.SyncSkillPayload
+import net.koji.arc_steam.common.network.payloads.SyncSkillsPayload
 import net.minecraft.client.Minecraft
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
-import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
 @EventBusSubscriber(modid = ArcaneSteam.MOD_ID)
 object ClientNetwork {

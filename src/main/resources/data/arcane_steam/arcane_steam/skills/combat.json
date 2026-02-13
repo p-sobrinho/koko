@@ -1,0 +1,16 @@
+{
+  "display_name": "skills.arcane_steam.combat",
+  "min_level": 0,
+  "default_level": 0,
+  "max_level": 10,
+  "overclocked_max_level": 20,
+
+  "sources" : [
+    {
+      "type": "entity/kill",
+      "filters": [
+        { "type": "whitelist", "target": "living", "priority": 0, "xp": 5, "inverse": false }
+      ]
+    }
+  ]
+}

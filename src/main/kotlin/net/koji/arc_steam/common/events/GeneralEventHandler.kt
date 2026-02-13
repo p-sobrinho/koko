@@ -1,17 +1,15 @@
 package net.koji.arc_steam.common.events
 
 import net.koji.arc_steam.ArcaneSteam
-import net.koji.arc_steam.common.registry.AttachmentsRegistry
-import net.koji.arc_steam.common.registry.DatapackRegistry.SKILL_REGISTRY
-import net.koji.arc_steam.common.registry.KeyRegistry
 import net.koji.arc_steam.common.SkillsHandler
+import net.koji.arc_steam.common.registry.AttachmentsRegistry
+import net.koji.arc_steam.common.registry.KeyRegistry
 import net.minecraft.client.Minecraft
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.client.event.ClientTickEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.level.BlockEvent
-import net.neoforged.neoforge.event.server.ServerStartedEvent
 
 @EventBusSubscriber(modid = ArcaneSteam.MOD_ID)
 object GeneralEventHandler {
@@ -37,11 +35,6 @@ object GeneralEventHandler {
                 skillData.isOverClocked
             )
         })
-    }
-
-    @SubscribeEvent
-    fun onBlockBreak(event: BlockEvent.BreakEvent) {
-        event.player.getData(AttachmentsRegistry.PLAYER_SKILLS).addXp(ArcaneSteam.namespacePath("mining"), 10)
     }
 
     @SubscribeEvent

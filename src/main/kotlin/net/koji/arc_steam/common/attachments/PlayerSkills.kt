@@ -3,8 +3,6 @@ package net.koji.arc_steam.common.attachments
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.koji.arc_steam.common.models.SkillData
-import net.koji.arc_steam.common.SkillsHandler
-import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
 import org.jetbrains.annotations.ApiStatus
 
@@ -33,24 +31,14 @@ class PlayerSkills {
     fun getAllSkills(): Map<ResourceLocation, SkillData> = skillsData
 
     @ApiStatus.Internal
-    fun addXp(skill: ResourceLocation, amount: Int) {
-        val skillData = getSkill(skill)
-
-        skillData.xp += amount
-    }
-
-    @ApiStatus.Internal
-    fun removeXp(skill: ResourceLocation, amount: Int) {
-        val skillData = getSkill(skill)
-
-        skillData.xp += amount
+    fun updateXp(skill: ResourceLocation, amount: Double) {
+        this.getSkill(skill).xp += amount
     }
 
     @ApiStatus.Internal
     fun replace(newSkillsData: Map<ResourceLocation, SkillData>) {
         skillsData.clear()
 
-        println("Received new data from server.$newSkillsData")
         skillsData.putAll(newSkillsData)
     }
 
