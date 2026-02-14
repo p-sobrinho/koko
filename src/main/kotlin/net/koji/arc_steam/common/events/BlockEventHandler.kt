@@ -3,7 +3,7 @@ package net.koji.arc_steam.common.events
 import net.koji.arc_steam.ArcaneSteam
 import net.koji.arc_steam.common.SkillsHandler
 import net.koji.arc_steam.common.models.sources.DefaultSources
-import net.koji.arc_steam.common.models.sources.SkillSource
+import net.koji.arc_steam.common.models.sources.AbstractSkillSource
 import net.koji.arc_steam.common.models.sources.SkillSourceFilter
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.TagKey
 import net.minecraft.world.level.block.state.BlockState
-import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
@@ -58,7 +57,7 @@ object BlockEventHandler {
             SkillsHandler.updateXp(player, listener.skill, xp)
         }
     }
-    fun blockEvaluate(skillModel: SkillSource, blockState: BlockState): Double =
+    fun blockEvaluate(skillModel: AbstractSkillSource, blockState: BlockState): Double =
         blockEvaluate(skillModel.filters, blockState)
 
     fun blockEvaluate(filters: List<SkillSourceFilter>, blockState: BlockState): Double {

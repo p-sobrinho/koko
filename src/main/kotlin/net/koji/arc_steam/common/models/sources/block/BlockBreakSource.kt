@@ -1,14 +1,14 @@
-package net.koji.arc_steam.common.models.sources.blocks
+package net.koji.arc_steam.common.models.sources.block
 
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import net.koji.arc_steam.common.models.sources.SkillSourceFilter
-import net.koji.arc_steam.common.models.sources.SkillSource
+import net.koji.arc_steam.common.models.sources.AbstractSkillSource
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 
 class BlockBreakSource(
     override val filters: List<SkillSourceFilter>
-) : SkillSource() {
+) : AbstractSkillSource() {
     override val type: String = TYPE
     companion object {
         const val TYPE = "block/break"

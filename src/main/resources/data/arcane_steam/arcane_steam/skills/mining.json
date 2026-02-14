@@ -3,15 +3,5 @@
   "min_level": 0,
   "default_level": 0,
   "max_level": 10,
-  "overclocked_max_level": 20,
-
-  "sources" : [
-    {
-      "type": "block/break",
-      "filters": [
-        { "type": "whitelist", "target": "mineable/pickaxe", "priority": 0, "xp": 5, "inverse": false },
-        { "type": "whitelist", "target": "minecraft:stone", "priority": 1, "xp": 5, "inverse": true }
-      ]
-    }
-  ]
+  "overclocked_max_level": 20
 }

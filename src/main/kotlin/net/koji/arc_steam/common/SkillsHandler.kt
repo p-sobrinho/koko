@@ -1,10 +1,12 @@
 package net.koji.arc_steam.common
 
-import net.koji.arc_steam.ArcaneSteam
+import com.mojang.logging.LogUtils
 import net.koji.arc_steam.common.attachments.PlayerSkills
 import net.koji.arc_steam.common.models.SkillData
 import net.koji.arc_steam.common.models.SkillModel
-import net.koji.arc_steam.common.models.sources.SkillSource
+import net.koji.arc_steam.common.models.effects.AbstractSkillEffect
+import net.koji.arc_steam.common.models.effects.AbstractSkillEffectFilter
+import net.koji.arc_steam.common.models.sources.AbstractSkillSource
 import net.koji.arc_steam.common.network.payloads.SyncSkillPayload
 import net.koji.arc_steam.common.network.payloads.SyncSkillsPayload
 import net.koji.arc_steam.common.registry.AttachmentsRegistry
@@ -20,10 +22,10 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.network.PacketDistributor
 import java.util.*
 
+
 @EventBusSubscriber
 object SkillsHandler {
-    private val LOGGER = ArcaneSteam.LOGGER
-    private val playerSkillsCache = HashMap<UUID, PlayerSkills>()
+    private val LOGGER = LogUtils.getLogger()
 
     fun syncNewSkills(level: Level, playerSkills: PlayerSkills) {
         val skillModels = getSkillsModels(level)
@@ -33,14 +35,21 @@ object SkillsHandler {
         }
     }
 
+    fun syncEffects(player: Player) {
+        if (player.level().isClientSide) return
+
+        val toApplyEffects = this.getEffectsForPlayer(player)
+
+        for (applier in toApplyEffects) applier.sourceData.apply(applier, player)
+    }
+
     fun updateXp(player: Player, skill: ResourceLocation, amount: Double) {
         if (player.level().isClientSide) return;
 
-        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { _ ->
-            player.getData(AttachmentsRegistry.PLAYER_SKILLS)
-        }
+        val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
 
         LOGGER.info("Updating {} xp from skill {} to {}.", player.name, skill, amount)
+
         playerSkills.updateXp(skill, amount)
 
         val playerSkill = playerSkills.getSkill(skill)
@@ -50,29 +59,21 @@ object SkillsHandler {
         )
     }
 
+    fun replaceSkill(player: Player, skill: ResourceLocation, data: SkillData) {
+        val playerSkills = this.getSkills(player)
+
+        playerSkills.put(skill, data)
+    }
+
+    fun replaceSkills(player: Player, skills: Map<ResourceLocation, SkillData>) {
+        val playerSkills = this.getSkills(player)
+
+        playerSkills.replace(skills)
+    }
+
     fun getSkill(player: Player, skill: ResourceLocation) = this.getSkills(player).getSkill(skill)
 
     fun getSkills(player: Player): PlayerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
-
-    fun getLevel(player: Player, skill: ResourceLocation): Int {
-        val skills = this.getSkills(player)
-        val skillData = skills.getSkill(skill)
-        val skillModel = this.getSkillModel(player.level(), skill)
-
-        val xp = skillData.xp
-        val maxLevel = if (skillData.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
-        var total = 0
-
-        for (level in 1..maxLevel) {
-            total += this.xpToLevelUp(level)
-
-            if (xp < total) {
-                return level
-            }
-        }
-
-        return maxLevel
-    }
 
     fun getSkillModel(level: Level, skill: ResourceLocation): SkillModel {
         val registry = level.registryAccess().registryOrThrow(DatapackRegistry.SKILL_REGISTRY);
@@ -104,26 +105,57 @@ object SkillsHandler {
         return skillsModels
     }
 
-    fun replaceSkill(player: Player, skill: ResourceLocation, data: SkillData) {
-        val playerSkills = this.getSkills(player)
+    fun getLevel(player: Player, skill: ResourceLocation): Int {
+        val skills = this.getSkills(player)
+        val skillData = skills.getSkill(skill)
+        val skillModel = this.getSkillModel(player.level(), skill)
 
-        playerSkills.put(skill, data)
+        val xp = skillData.xp
+        val maxLevel = if (skillData.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
+        var total = 0
+
+        for (level in 1..maxLevel) {
+            total += this.xpToLevelUp(level)
+
+            if (xp < total) {
+                return level
+            }
+        }
+
+        return maxLevel
     }
 
-    fun replaceSkills(player: Player, skills: Map<ResourceLocation, SkillData>) {
-        val playerSkills = this.getSkills(player)
+    fun getEffectsForPlayer(player: Player): Set<SkillEffectApplier> {
+        val skillsModels = this.getSkillsModels(player)
 
-        playerSkills.replace(skills)
+        return skillsModels.mapNotNull { (location, model) ->
+            val playerLevel = this.getLevel(player, location.location())
+
+            model.effects.mapNotNull { effect ->
+                effect.doAnyApplies(playerLevel)?.let { applies ->
+                    SkillEffectApplier(location.location(), effect, applies)
+                }
+            }.takeIf { it.isNotEmpty() }
+        }.flatten().toSet()
     }
 
     @SubscribeEvent
-    fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) = replicateToPlayer(event)
+    fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) {
+        replicateToPlayer(event)
+        syncEffects(event.entity)
+    }
 
     @SubscribeEvent
-    fun onPlayerRespawn(event: PlayerEvent.PlayerRespawnEvent) = replicateToPlayer(event)
+    fun onPlayerRespawn(event: PlayerEvent.PlayerRespawnEvent) {
+        replicateToPlayer(event)
+        syncEffects(event.entity)
+    }
 
     @SubscribeEvent
-    fun onPlayerChangedDimension(event: PlayerEvent.PlayerChangedDimensionEvent) = replicateToPlayer(event)
+    fun onPlayerChangedDimension(event: PlayerEvent.PlayerChangedDimensionEvent) {
+        replicateToPlayer(event)
+        syncEffects(event.entity)
+    }
 
     private fun replicateToPlayer(event: PlayerEvent) {
         val player = event.entity
@@ -131,9 +163,7 @@ object SkillsHandler {
         // Making sure that player will never be a LocalPlayer
         if (player.level().isClientSide) return
 
-        val playerSkills = playerSkillsCache.computeIfAbsent(player.getUUID()) { _ ->
-            player.getData(AttachmentsRegistry.PLAYER_SKILLS)
-        }
+        val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
 
         PacketDistributor.sendToPlayer(player as ServerPlayer, SyncSkillsPayload(playerSkills.getAllSkills()))
     }
@@ -142,5 +172,9 @@ object SkillsHandler {
         return (100 + level * 25)
     }
 
-    data class SkillModelSourceListener(val skill: ResourceLocation, val sourceData: SkillSource)
+    data class SkillModelSourceListener(val skill: ResourceLocation, val sourceData: AbstractSkillSource)
+
+    data class SkillEffectApplier(
+        val skill: ResourceLocation, val sourceData: AbstractSkillEffect, val filter: AbstractSkillEffectFilter
+    )
 }

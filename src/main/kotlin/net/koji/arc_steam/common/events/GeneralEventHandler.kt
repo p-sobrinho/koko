@@ -1,5 +1,6 @@
 package net.koji.arc_steam.common.events
 
+import com.mojang.logging.LogUtils
 import net.koji.arc_steam.ArcaneSteam
 import net.koji.arc_steam.common.SkillsHandler
 import net.koji.arc_steam.common.registry.AttachmentsRegistry
@@ -13,7 +14,7 @@ import net.neoforged.neoforge.event.level.BlockEvent
 
 @EventBusSubscriber(modid = ArcaneSteam.MOD_ID)
 object GeneralEventHandler {
-    private val LOGGER = ArcaneSteam.LOGGER
+    private val LOGGER = LogUtils.getLogger()
 
     @SubscribeEvent
     fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) {
