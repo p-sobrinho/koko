@@ -7,29 +7,29 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 
-class SkillEffectAboveFilter(
+class AboveSkillEffectFilter(
     val level: Int, val value: Double, val operation: AttributeModifier.Operation
 ): AbstractSkillEffectFilter() {
     override val type: String = TYPE
 
-    override fun apply(level: Int): Boolean = (level > this.level)
+    override fun apply(level: Int): Boolean = (level >= this.level)
 
     companion object {
         const val TYPE = "above"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                Codec.INT.fieldOf("level").forGetter(SkillEffectAboveFilter::level),
-                Codec.DOUBLE.fieldOf("value").forGetter(SkillEffectAboveFilter::value),
-                AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(SkillEffectAboveFilter::operation)
-            ).apply(instance, ::SkillEffectAboveFilter)
+                Codec.INT.fieldOf("level").forGetter(AboveSkillEffectFilter::level),
+                Codec.DOUBLE.fieldOf("value").forGetter(AboveSkillEffectFilter::value),
+                AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(AboveSkillEffectFilter::operation)
+            ).apply(instance, ::AboveSkillEffectFilter)
         }
 
         val STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, SkillEffectAboveFilter::level,
-            ByteBufCodecs.DOUBLE, SkillEffectAboveFilter::value,
-            AttributeModifier.Operation.STREAM_CODEC, SkillEffectAboveFilter::operation,
-            ::SkillEffectAboveFilter
+            ByteBufCodecs.INT, AboveSkillEffectFilter::level,
+            ByteBufCodecs.DOUBLE, AboveSkillEffectFilter::value,
+            AttributeModifier.Operation.STREAM_CODEC, AboveSkillEffectFilter::operation,
+            ::AboveSkillEffectFilter
         )
     }
 }

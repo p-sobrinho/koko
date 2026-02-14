@@ -1,11 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "dev.koji.skillforge.common.mixins",
+  "package": "dev.koji.skillforge.mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
+    "CraftingMenuMixin"
   ],
   "injectors": {
     "defaultRequire": 1

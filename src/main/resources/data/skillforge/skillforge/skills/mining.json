@@ -3,5 +3,17 @@
   "min_level": 0,
   "default_level": 0,
   "max_level": 10,
-  "overclocked_max_level": 20
+  "overclocked_max_level": 20,
+
+  "effects": [
+    {
+      "type": "player/crafting",
+      "recipe": "stick",
+      "filter": { "type": "blocked", "until": 7 }
+    },
+    {
+      "type": "player/forge",
+
+    }
+  ]
 }

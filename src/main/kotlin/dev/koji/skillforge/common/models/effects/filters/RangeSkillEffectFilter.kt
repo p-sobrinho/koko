@@ -7,7 +7,7 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 
-class SkillEffectRangeFilter(
+class RangeSkillEffectFilter(
     val from: Int, val to: Int, val value: Double, val operation: AttributeModifier.Operation
 ): AbstractSkillEffectFilter() {
     override val type: String = TYPE
@@ -19,19 +19,19 @@ class SkillEffectRangeFilter(
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                Codec.INT.fieldOf("from").forGetter(SkillEffectRangeFilter::from),
-                Codec.INT.fieldOf("to").forGetter(SkillEffectRangeFilter::to),
-                Codec.DOUBLE.fieldOf("value").forGetter(SkillEffectRangeFilter::value),
-                AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(SkillEffectRangeFilter::operation)
-            ).apply(instance, ::SkillEffectRangeFilter)
+                Codec.INT.fieldOf("from").forGetter(RangeSkillEffectFilter::from),
+                Codec.INT.fieldOf("to").forGetter(RangeSkillEffectFilter::to),
+                Codec.DOUBLE.fieldOf("value").forGetter(RangeSkillEffectFilter::value),
+                AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(RangeSkillEffectFilter::operation)
+            ).apply(instance, ::RangeSkillEffectFilter)
         }
 
         val STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT, SkillEffectRangeFilter::from,
-            ByteBufCodecs.INT, SkillEffectRangeFilter::to,
-            ByteBufCodecs.DOUBLE, SkillEffectRangeFilter::value,
-            AttributeModifier.Operation.STREAM_CODEC, SkillEffectRangeFilter::operation,
-            ::SkillEffectRangeFilter
+            ByteBufCodecs.INT, RangeSkillEffectFilter::from,
+            ByteBufCodecs.INT, RangeSkillEffectFilter::to,
+            ByteBufCodecs.DOUBLE, RangeSkillEffectFilter::value,
+            AttributeModifier.Operation.STREAM_CODEC, RangeSkillEffectFilter::operation,
+            ::RangeSkillEffectFilter
         )
     }
 }

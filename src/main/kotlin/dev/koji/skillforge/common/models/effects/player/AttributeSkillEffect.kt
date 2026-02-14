@@ -7,9 +7,9 @@ import dev.koji.skillforge.SkillForge
 import dev.koji.skillforge.common.SkillsHandler
 import dev.koji.skillforge.common.models.effects.AbstractSkillEffect
 import dev.koji.skillforge.common.models.effects.AbstractSkillEffectFilter
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectAboveFilter
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectBellowFilter
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectRangeFilter
+import dev.koji.skillforge.common.models.effects.filters.AboveSkillEffectFilter
+import dev.koji.skillforge.common.models.effects.filters.BellowSkillEffectFilter
+import dev.koji.skillforge.common.models.effects.filters.RangeSkillEffectFilter
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.codec.ByteBufCodecs
@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player
 
 class AttributeSkillEffect(
     val attribute: String,
-    override val filters: List<AbstractSkillEffectFilter>
+    val filters: List<AbstractSkillEffectFilter>
 ) : AbstractSkillEffect() {
     override val type: String = TYPE
 
@@ -38,13 +38,13 @@ class AttributeSkillEffect(
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         val attributes = player.attributes
 
-        val rl =
+        val attributeLocation =
             if (attribute.contains(":")) ResourceLocation.parse(attribute)
             else ResourceLocation.fromNamespaceAndPath("minecraft", attribute)
 
-        LOGGER.info(rl.toString())
-
-        val attributeHolder = BuiltInRegistries.ATTRIBUTE.getHolder(ResourceKey.create(Registries.ATTRIBUTE, rl))
+        val attributeHolder = BuiltInRegistries.ATTRIBUTE.getHolder(
+            ResourceKey.create(Registries.ATTRIBUTE, attributeLocation)
+        )
 
         if (attributeHolder.isEmpty) return LOGGER.warn("Unable to find holder for $attribute")
 
@@ -52,16 +52,16 @@ class AttributeSkillEffect(
             ?: return LOGGER.warn("Unable to find instance for $attribute")
 
         val modifier = when(val filter = applier.filter) {
-            is SkillEffectAboveFilter -> AttributeModifier(
-                SkillForge.namespacePath("attribute_${rl.path}"), filter.value, AttributeModifier.Operation.ADD_VALUE
+            is AboveSkillEffectFilter -> AttributeModifier(
+                SkillForge.namespacePath("attribute_${attributeLocation.path}"), filter.value, filter.operation
             )
 
-            is SkillEffectRangeFilter -> AttributeModifier(
-                SkillForge.namespacePath("attribute_${rl.path}"), filter.value, AttributeModifier.Operation.ADD_VALUE
+            is RangeSkillEffectFilter -> AttributeModifier(
+                SkillForge.namespacePath("attribute_${attributeLocation.path}"), filter.value, filter.operation
             )
 
-            is SkillEffectBellowFilter -> AttributeModifier(
-                SkillForge.namespacePath("attribute_${rl.path}"), filter.value, AttributeModifier.Operation.ADD_VALUE
+            is BellowSkillEffectFilter -> AttributeModifier(
+                SkillForge.namespacePath("attribute_${attributeLocation.path}"), filter.value, filter.operation
             )
 
             else -> return LOGGER.warn("Couldn't identify modifier.")

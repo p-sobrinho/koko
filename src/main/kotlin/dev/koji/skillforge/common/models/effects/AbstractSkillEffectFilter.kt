@@ -2,13 +2,13 @@ package dev.koji.skillforge.common.models.effects
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectAboveFilter
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectBellowFilter
-import dev.koji.skillforge.common.models.effects.filters.SkillEffectRangeFilter
+import dev.koji.skillforge.common.models.effects.filters.AboveSkillEffectFilter
+import dev.koji.skillforge.common.models.effects.filters.BellowSkillEffectFilter
+import dev.koji.skillforge.common.models.effects.filters.BlockedSkillEffectFilter
+import dev.koji.skillforge.common.models.effects.filters.RangeSkillEffectFilter
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
-import kotlin.String
 
 abstract class AbstractSkillEffectFilter {
     abstract val type: String
@@ -42,15 +42,17 @@ abstract class AbstractSkillEffectFilter {
             )
 
         val codecsMapper = mapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
-            SkillEffectAboveFilter.TYPE to SkillEffectAboveFilter.CODEC,
-            SkillEffectRangeFilter.TYPE to SkillEffectRangeFilter.CODEC,
-            SkillEffectBellowFilter.TYPE to SkillEffectBellowFilter.CODEC
+            AboveSkillEffectFilter.TYPE to AboveSkillEffectFilter.CODEC,
+            RangeSkillEffectFilter.TYPE to RangeSkillEffectFilter.CODEC,
+            BellowSkillEffectFilter.TYPE to BellowSkillEffectFilter.CODEC,
+            BlockedSkillEffectFilter.TYPE to BlockedSkillEffectFilter.CODEC
         )
 
         val streamCodecsMapper = mapOf(
-            SkillEffectAboveFilter.TYPE to SkillEffectAboveFilter.STREAM_CODEC,
-            SkillEffectRangeFilter.TYPE to SkillEffectRangeFilter.STREAM_CODEC,
-            SkillEffectBellowFilter.TYPE to SkillEffectBellowFilter.STREAM_CODEC
+            AboveSkillEffectFilter.TYPE to AboveSkillEffectFilter.STREAM_CODEC,
+            RangeSkillEffectFilter.TYPE to RangeSkillEffectFilter.STREAM_CODEC,
+            BellowSkillEffectFilter.TYPE to BellowSkillEffectFilter.STREAM_CODEC,
+            BlockedSkillEffectFilter.TYPE to BlockedSkillEffectFilter.STREAM_CODEC
         )
     }
 }
