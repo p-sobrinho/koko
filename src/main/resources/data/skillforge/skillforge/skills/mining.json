@@ -9,11 +9,12 @@
     {
       "type": "player/crafting",
       "recipe": "stick",
-      "filter": { "type": "blocked", "until": 7 }
+      "filter": { "type": "filter/blocked", "until": 7 }
     },
     {
-      "type": "player/forge",
-
+      "type": "player/item_consume",
+      "item": "apple",
+      "filter": { "type": "filter/blocked", "until": 5 }
     }
   ]
 }

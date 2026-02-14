@@ -12,5 +12,13 @@
         { "type": "whitelist", "target": "living", "priority": 0, "xp": 5, "inverse": false }
       ]
     }
+  ],
+
+  "effects": [
+    {
+      "type": "player/item_attack",
+      "item": "diamond_sword",
+      "filter": { "type": "filter/blocked", "until": 3 }
+    }
   ]
 }

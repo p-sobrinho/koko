@@ -7,14 +7,13 @@ import dev.koji.skillforge.common.SkillsHandler
 import dev.koji.skillforge.common.events.PlayerEventHandler
 import dev.koji.skillforge.common.models.effects.AbstractSkillEffect
 import dev.koji.skillforge.common.models.effects.AbstractSkillEffectFilter
-import dev.koji.skillforge.common.models.effects.filters.BlockedSkillEffectFilter
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 
-class CraftingSkillEffect(
-    val recipe: String,
+class ItemConsumeSkillEffect(
+    val item: String,
     val filter: AbstractSkillEffectFilter
 ) : AbstractSkillEffect() {
     override val type: String = TYPE
@@ -23,26 +22,26 @@ class CraftingSkillEffect(
 
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         val recipeLocation =
-            if (recipe.contains(":")) ResourceLocation.parse(recipe)
-            else ResourceLocation.fromNamespaceAndPath("minecraft", recipe)
+            if (item.contains(":")) ResourceLocation.parse(item)
+            else ResourceLocation.fromNamespaceAndPath("minecraft", item)
 
-        PlayerEventHandler.addBlockedItem(player.uuid, recipeLocation, PlayerEventHandler.BlockScope.CRAFT)
+        PlayerEventHandler.addBlockedItem(player.uuid, recipeLocation, PlayerEventHandler.BlockScope.CONSUME)
     }
 
     companion object {
-        const val TYPE = "player/crafting"
+        const val TYPE = "player/item_consume"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                Codec.STRING.fieldOf("recipe").forGetter(CraftingSkillEffect::recipe),
-                AbstractSkillEffectFilter.CODEC.fieldOf("filter").forGetter(CraftingSkillEffect::filter)
-            ).apply(instance, ::CraftingSkillEffect)
+                Codec.STRING.fieldOf("item").forGetter(ItemConsumeSkillEffect::item),
+                AbstractSkillEffectFilter.CODEC.fieldOf("filter").forGetter(ItemConsumeSkillEffect::filter)
+            ).apply(instance, ::ItemConsumeSkillEffect)
         }
 
         val STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, CraftingSkillEffect::recipe,
-            AbstractSkillEffectFilter.STREAM_CODEC, CraftingSkillEffect::filter,
-            ::CraftingSkillEffect
+            ByteBufCodecs.STRING_UTF8, ItemConsumeSkillEffect::item,
+            AbstractSkillEffectFilter.STREAM_CODEC, ItemConsumeSkillEffect::filter,
+            ::ItemConsumeSkillEffect
         )
 
         private val LOGGER = LogUtils.getLogger()

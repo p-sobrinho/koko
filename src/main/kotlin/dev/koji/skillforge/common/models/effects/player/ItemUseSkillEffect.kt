@@ -26,9 +26,7 @@ class ItemUseSkillEffect(
             if (item.contains(":")) ResourceLocation.parse(item)
             else ResourceLocation.fromNamespaceAndPath("minecraft", item)
 
-        PlayerEventHandler.addBlockedItem(
-            player.uuid, recipeLocation.toString(), (applier.filter as BlockedSkillEffectFilter).until
-        )
+        PlayerEventHandler.addBlockedItem(player.uuid, recipeLocation, PlayerEventHandler.BlockScope.USE)
     }
 
     companion object {

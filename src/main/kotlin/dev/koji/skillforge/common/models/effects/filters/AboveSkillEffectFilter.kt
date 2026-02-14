@@ -15,7 +15,7 @@ class AboveSkillEffectFilter(
     override fun apply(level: Int): Boolean = (level >= this.level)
 
     companion object {
-        const val TYPE = "above"
+        const val TYPE = "filter/above"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(

@@ -12,7 +12,7 @@ class BlockedSkillEffectFilter(val until: Int): AbstractSkillEffectFilter() {
     override fun apply(level: Int): Boolean = (level < until)
 
     companion object {
-        const val TYPE = "blocked"
+        const val TYPE = "filter/blocked"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(

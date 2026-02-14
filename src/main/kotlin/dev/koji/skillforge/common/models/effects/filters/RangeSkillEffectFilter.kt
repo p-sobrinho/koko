@@ -15,7 +15,7 @@ class RangeSkillEffectFilter(
     override fun apply(level: Int): Boolean = (level in from..to)
 
     companion object {
-        const val TYPE = "range"
+        const val TYPE = "filter/range"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(

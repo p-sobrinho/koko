@@ -15,7 +15,7 @@ class BellowSkillEffectFilter(
     override fun apply(level: Int): Boolean = (level <= this.level)
 
     companion object {
-        const val TYPE = "bellow"
+        const val TYPE = "filter/bellow"
 
         val CODEC = RecordCodecBuilder.mapCodec { instance ->
             instance.group(

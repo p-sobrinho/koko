@@ -1,6 +1,5 @@
 package dev.koji.skillforge.common.events
 
-import com.mojang.logging.LogUtils
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
@@ -14,6 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.AnvilUpdateEvent
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import java.util.*
@@ -30,8 +30,19 @@ object PlayerEventHandler {
     fun onItemUse(event: PlayerInteractEvent.RightClickItem) {
         val player = event.entity
 
-        if (!this.isItemBlockedFor(player, player.mainHandItem, BlockScope.USE)) return
+        if (player.level().isClientSide || !this.isItemBlockedFor(player, player.mainHandItem, BlockScope.USE)) return
 
+        triggerMessage(player, EventMessage.UNABLE_TO_USE)
+        event.isCanceled = true
+    }
+
+    @SubscribeEvent
+    fun onItemAttack(event: AttackEntityEvent) {
+        val player = event.entity
+
+        if (player.level().isClientSide || !this.isItemBlockedFor(player, player.mainHandItem, BlockScope.ATTACK)) return
+
+        triggerMessage(player, EventMessage.UNABLE_TO_ATTACK)
         event.isCanceled = true
     }
 
@@ -39,8 +50,9 @@ object PlayerEventHandler {
     fun onItemConsume(event: LivingEntityUseItemEvent.Start) {
         val player = (event.entity as? Player) ?: return
 
-        if (!this.isItemBlockedFor(player, event.item, BlockScope.CONSUME)) return
+        if (player.level().isClientSide || !this.isItemBlockedFor(player, event.item, BlockScope.CONSUME)) return
 
+        triggerMessage(player, EventMessage.UNABLE_TO_CONSUME)
         event.isCanceled = true
     }
 
@@ -49,7 +61,7 @@ object PlayerEventHandler {
         val player = event.entity
         val result = event.crafting
 
-        if (!isItemBlockedFor(player, result, BlockScope.CRAFT)) return
+        if (player.level().isClientSide || !isItemBlockedFor(player, result, BlockScope.CRAFT)) return
 
         result.count = 0
 
@@ -64,7 +76,7 @@ object PlayerEventHandler {
     fun onAnvilUpdate(event: AnvilUpdateEvent) {
         val player = event.player
 
-        if (!isItemBlockedFor(player.getUUID(), event.output, BlockScope.CRAFT)) return
+        if (player.level().isClientSide || !isItemBlockedFor(player.getUUID(), event.output, BlockScope.CRAFT)) return
 
         event.output = ItemStack.EMPTY
     }
@@ -105,6 +117,9 @@ object PlayerEventHandler {
 
     fun triggerMessage(player: Player, eventMessage: EventMessage) {
         val message = when (eventMessage) {
+            EventMessage.UNABLE_TO_USE -> "§cSeems like you don't know how to use this item..."
+            EventMessage.UNABLE_TO_ATTACK -> "§cYou feel to weak to use this weapon..."
+            EventMessage.UNABLE_TO_CONSUME -> "§cYou don't know a proper way to consume this item..."
             EventMessage.UNABLE_TO_CRAFT -> "§cSeems like you don't know what do with theses items..."
             EventMessage.UNABLE_TO_FORGE -> "§cSeems like you don't know how to enchant this item..."
         }
@@ -171,6 +186,8 @@ object PlayerEventHandler {
         level.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS)
     }
 
-    enum class EventMessage { UNABLE_TO_CRAFT, UNABLE_TO_FORGE }
+    enum class EventMessage {
+        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE
+    }
     enum class BlockScope { USE, ATTACK, CONSUME, CRAFT }
 }
