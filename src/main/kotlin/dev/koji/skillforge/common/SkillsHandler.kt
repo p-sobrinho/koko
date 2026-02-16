@@ -26,6 +26,11 @@ import net.neoforged.neoforge.network.PacketDistributor
 object SkillsHandler {
     private val LOGGER = LogUtils.getLogger()
 
+    fun safeParseResource(resource: String): ResourceLocation {
+        return if (resource.contains(":")) ResourceLocation.parse(resource.removePrefix("#"))
+        else ResourceLocation.fromNamespaceAndPath("minecraft", resource)
+    }
+
     fun syncNewSkills(level: Level, playerSkills: PlayerSkills) {
         val skillModels = getSkillsModels(level)
 
@@ -38,8 +43,6 @@ object SkillsHandler {
         if (player.level().isClientSide) return
 
         val toApplyEffects = this.getEffectsForPlayer(player)
-
-        // TODO("A way to clean the past effects")
 
         for (applier in toApplyEffects) applier.sourceData.apply(applier, player)
     }

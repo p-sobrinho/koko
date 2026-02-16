@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec
 import dev.koji.skillforge.common.SkillsHandler
 import dev.koji.skillforge.common.models.effects.player.AttributeSkillEffect
 import dev.koji.skillforge.common.models.effects.player.CraftingSkillEffect
+import dev.koji.skillforge.common.models.effects.player.ForgeSkillEffect
 import dev.koji.skillforge.common.models.effects.player.ItemAttackSkillEffect
 import dev.koji.skillforge.common.models.effects.player.ItemConsumeSkillEffect
 import dev.koji.skillforge.common.models.effects.player.ItemUseSkillEffect
@@ -50,15 +51,17 @@ abstract class AbstractSkillEffect {
             CraftingSkillEffect.TYPE to CraftingSkillEffect.CODEC,
             ItemUseSkillEffect.TYPE to ItemUseSkillEffect.CODEC,
             ItemConsumeSkillEffect.TYPE to ItemConsumeSkillEffect.CODEC,
-            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.CODEC
+            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.CODEC,
+            ForgeSkillEffect.TYPE to ForgeSkillEffect.CODEC
         )
 
-        private val streamMapper = mapOf(
+        private val streamMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>>(
             AttributeSkillEffect.TYPE to AttributeSkillEffect.STREAM_CODEC,
             CraftingSkillEffect.TYPE to CraftingSkillEffect.STREAM_CODEC,
             ItemUseSkillEffect.TYPE to ItemUseSkillEffect.STREAM_CODEC,
             ItemConsumeSkillEffect.TYPE to ItemConsumeSkillEffect.STREAM_CODEC,
-            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.STREAM_CODEC
+            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.STREAM_CODEC,
+            ForgeSkillEffect.TYPE to ForgeSkillEffect.STREAM_CODEC
         )
     }
 }

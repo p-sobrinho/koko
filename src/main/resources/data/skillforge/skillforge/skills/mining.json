@@ -3,18 +3,5 @@
   "min_level": 0,
   "default_level": 0,
   "max_level": 10,
-  "overclocked_max_level": 20,
-
-  "effects": [
-    {
-      "type": "player/crafting",
-      "recipe": "stick",
-      "filter": { "type": "filter/blocked", "until": 7 }
-    },
-    {
-      "type": "player/item_consume",
-      "item": "apple",
-      "filter": { "type": "filter/blocked", "until": 5 }
-    }
-  ]
+  "overclocked_max_level": 20
 }

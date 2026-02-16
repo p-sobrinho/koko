@@ -21,11 +21,9 @@ class ItemConsumeSkillEffect(
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? = filter.takeIf { it.apply(level) }
 
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
-        val recipeLocation =
-            if (item.contains(":")) ResourceLocation.parse(item)
-            else ResourceLocation.fromNamespaceAndPath("minecraft", item)
-
-        PlayerEventHandler.addBlockedItem(player.uuid, recipeLocation, PlayerEventHandler.BlockScope.CONSUME)
+        PlayerEventHandler.addBlockedItem(
+            player.uuid, SkillsHandler.safeParseResource(item), PlayerEventHandler.BlockScope.CONSUME
+        )
     }
 
     companion object {

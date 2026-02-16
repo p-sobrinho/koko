@@ -3,13 +3,5 @@
   "min_level": 0,
   "default_level": 0,
   "max_level": 10,
-  "overclocked_max_level": 20,
-
-  "effects": [
-    {
-      "type": "player/item_use",
-      "item": "experience_bottle",
-      "filter": { "type": "filter/blocked", "until": 3 }
-    }
-  ]
+  "overclocked_max_level": 20
 }

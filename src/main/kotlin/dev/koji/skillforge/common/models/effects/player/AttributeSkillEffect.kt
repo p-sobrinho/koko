@@ -38,9 +38,7 @@ class AttributeSkillEffect(
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         val attributes = player.attributes
 
-        val attributeLocation =
-            if (attribute.contains(":")) ResourceLocation.parse(attribute)
-            else ResourceLocation.fromNamespaceAndPath("minecraft", attribute)
+        val attributeLocation = SkillsHandler.safeParseResource(attribute)
 
         val attributeHolder = BuiltInRegistries.ATTRIBUTE.getHolder(
             ResourceKey.create(Registries.ATTRIBUTE, attributeLocation)
