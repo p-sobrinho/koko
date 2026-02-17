@@ -13,7 +13,6 @@ object DatapackRegistry {
     val SKILL_REGISTRY: ResourceKey<Registry<SkillModel>> =
         ResourceKey.createRegistryKey(Koko.namespacePath("skills"))
 
-
     @SubscribeEvent
     fun register(event: DataPackRegistryEvent.NewRegistry) {
         event.dataPackRegistry(
