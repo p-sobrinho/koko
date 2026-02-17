@@ -8,7 +8,8 @@ import dev.koji.koko.common.models.sources.AbstractSkillSource
 import net.minecraft.network.codec.ByteBufCodecs
 
 data class SkillModel(
-    val displayName: String, val minLevel: Int, val defaultXp: Double,
+    val displayName: String, val icon: String, val description: String,
+    val minLevel: Int, val defaultXp: Double,
     val maxLevel: Int, val overClockedMaxLevel: Int,
     val skillSources: List<AbstractSkillSource>, val effects: List<AbstractSkillEffect>
 ) {
@@ -16,6 +17,8 @@ data class SkillModel(
         val CODEC = RecordCodecBuilder.create { instance ->
             instance.group(
                 Codec.STRING.fieldOf("display_name").forGetter(SkillModel::displayName),
+                Codec.STRING.fieldOf("icon").forGetter(SkillModel::icon),
+                Codec.STRING.fieldOf("description").forGetter(SkillModel::displayName),
                 Codec.INT.fieldOf("min_level").forGetter(SkillModel::minLevel),
                 Codec.DOUBLE.fieldOf("default_level").forGetter(SkillModel::defaultXp),
                 Codec.INT.fieldOf("max_level").forGetter(SkillModel::maxLevel),
@@ -27,6 +30,8 @@ data class SkillModel(
 
         val STREAM_CODEC = StreamCodecKTX.composite(
             ByteBufCodecs.STRING_UTF8, SkillModel::displayName,
+            ByteBufCodecs.STRING_UTF8, SkillModel::icon,
+            ByteBufCodecs.STRING_UTF8, SkillModel::description,
             ByteBufCodecs.VAR_INT, SkillModel::minLevel,
             ByteBufCodecs.DOUBLE, SkillModel::defaultXp,
             ByteBufCodecs.VAR_INT, SkillModel::maxLevel,

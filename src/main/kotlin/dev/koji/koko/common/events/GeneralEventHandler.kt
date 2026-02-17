@@ -2,6 +2,7 @@ package dev.koji.koko.common.events
 
 import com.mojang.logging.LogUtils
 import dev.koji.koko.Koko
+import dev.koji.koko.client.ui.SkillsScreen
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.registry.AttachmentsRegistry
 import dev.koji.koko.common.registry.KeyRegistry
@@ -41,21 +42,7 @@ object GeneralEventHandler {
     fun onClientTick(event: ClientTickEvent.Post) {
         while (KeyRegistry.OPEN_SKILLS.consumeClick()) {
             val mc = Minecraft.getInstance()
-            val player = mc.player ?: return
-
-            val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS.get())
-
-            LOGGER.info("{} has skills level at:", player.getName())
-
-            SkillsHandler.getSkillsModels(player).forEach { skill ->
-                print("SKILL DETECTED")
-                println(skill.key)
-                println(skill.value)
-            }
-
-            playerSkills.getAllSkills().forEach { (a, b) ->
-                LOGGER.info("{} - {}", a.toString(), b)
-            }
+            mc.setScreen(SkillsScreen())
         }
     }
 }

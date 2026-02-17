@@ -31,11 +31,6 @@ class PlayerSkills {
     fun getAllSkills(): Map<ResourceLocation, SkillData> = skillsData
 
     @ApiStatus.Internal
-    fun updateXp(skill: ResourceLocation, amount: Double) {
-        this.getSkill(skill).xp += amount
-    }
-
-    @ApiStatus.Internal
     fun replace(newSkillsData: Map<ResourceLocation, SkillData>) {
         skillsData.clear()
 

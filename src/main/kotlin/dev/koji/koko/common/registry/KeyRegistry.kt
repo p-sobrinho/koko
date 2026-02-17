@@ -14,10 +14,10 @@ import org.lwjgl.glfw.GLFW
 object KeyRegistry {
     private val LOGGER = LogUtils.getLogger()
 
-    const val CATEGORY = "key.categories.arcane_steam"
+    const val CATEGORY = "keys.koko.name"
 
     val OPEN_SKILLS = KeyMapping(
-        "key.arc_steam.open_skills", InputConstants.Type.KEYSYM,
+        "keys.koko.skills", InputConstants.Type.KEYSYM,
         GLFW.GLFW_KEY_C, CATEGORY
     )
 

@@ -58,9 +58,16 @@ object SkillsHandler {
 
         LOGGER.info("Updating {} xp from skill {} to {}.", player.name, skill, amount)
 
-        playerSkills.updateXp(skill, amount)
-
         val playerSkill = playerSkills.getSkill(skill)
+        val skillModel = this.getSkillModel(player.level(), skill)
+        val maxLevel = if (playerSkill.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
+        val maxXp = xpToLevelUp(maxLevel).toDouble()
+
+        if (this.getLevel(player, skill) == maxLevel) {
+            playerSkill.xp = maxXp
+        } else {
+            playerSkill.xp += maxXp.coerceAtMost(playerSkill.xp)
+        }
 
         PacketDistributor.sendToPlayer(
             player as ServerPlayer, SyncSkillPayload(skill, playerSkill)
@@ -87,6 +94,12 @@ object SkillsHandler {
 
     fun getSkillModel(level: Level, skill: ResourceLocation): SkillModel {
         val registry = level.registryAccess().registryOrThrow(DatapackRegistry.SKILL_REGISTRY);
+
+        return registry.get(skill) ?: throw RuntimeException("Unable to find skill model for $skill.")
+    }
+
+    fun getSkillModel(player: Player, skill: ResourceLocation): SkillModel {
+        val registry = player.registryAccess().registryOrThrow(DatapackRegistry.SKILL_REGISTRY);
 
         return registry.get(skill) ?: throw RuntimeException("Unable to find skill model for $skill.")
     }
@@ -122,12 +135,12 @@ object SkillsHandler {
 
         val xp = skillData.xp
         val maxLevel = if (skillData.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
-        var total = 0
+        var total: Int
 
         for (level in 1..maxLevel) {
-            total += this.xpToLevelUp(level)
+            total = this.xpToLevelUp(level)
 
-            if (xp < total) {
+            if (xp <= total) {
                 return level
             }
         }
@@ -181,6 +194,10 @@ object SkillsHandler {
         syncEffects(event.entity)
     }
 
+    fun xpToLevelUp(level: Int): Int {
+        return 100 + 25 * level + 5 * level * level
+    }
+
     private fun replicateToPlayer(event: PlayerEvent) {
         val player = event.entity
 
@@ -190,10 +207,6 @@ object SkillsHandler {
         val playerSkills = player.getData(AttachmentsRegistry.PLAYER_SKILLS)
 
         PacketDistributor.sendToPlayer(player as ServerPlayer, SyncSkillsPayload(playerSkills.getAllSkills()))
-    }
-
-    private fun xpToLevelUp(level: Int): Int {
-        return (100 + level * 25)
     }
 
     data class SkillModelSourceListener(val skill: ResourceLocation, val sourceData: AbstractSkillSource)
