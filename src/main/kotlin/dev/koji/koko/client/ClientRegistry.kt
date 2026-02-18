@@ -1,8 +1,8 @@
-package dev.koji.koko.common.registry
+package dev.koji.koko.client
 
 import com.mojang.blaze3d.platform.InputConstants
-import com.mojang.logging.LogUtils
 import dev.koji.koko.Koko
+import dev.koji.koko.common.Translatables
 import net.minecraft.client.KeyMapping
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.SubscribeEvent
@@ -11,14 +11,12 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent
 import org.lwjgl.glfw.GLFW
 
 @EventBusSubscriber(modid = Koko.MOD_ID, value = [Dist.CLIENT])
-object KeyRegistry {
-    private val LOGGER = LogUtils.getLogger()
-
-    const val CATEGORY = "keys.koko.name"
-
+object ClientRegistry {
     val OPEN_SKILLS = KeyMapping(
-        "keys.koko.skills", InputConstants.Type.KEYSYM,
-        GLFW.GLFW_KEY_C, CATEGORY
+        Translatables.KEYS_KOKO_SKILLS,
+        InputConstants.Type.KEYSYM,
+        GLFW.GLFW_KEY_C,
+        Translatables.KEYS_KOKO_CATEGORY
     )
 
     @SubscribeEvent

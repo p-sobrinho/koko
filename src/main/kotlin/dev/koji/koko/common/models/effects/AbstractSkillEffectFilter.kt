@@ -48,7 +48,7 @@ abstract class AbstractSkillEffectFilter {
             BlockedSkillEffectFilter.TYPE to BlockedSkillEffectFilter.CODEC
         )
 
-        val streamCodecsMapper = mapOf(
+        val streamCodecsMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
             AboveSkillEffectFilter.TYPE to AboveSkillEffectFilter.STREAM_CODEC,
             RangeSkillEffectFilter.TYPE to RangeSkillEffectFilter.STREAM_CODEC,
             BellowSkillEffectFilter.TYPE to BellowSkillEffectFilter.STREAM_CODEC,

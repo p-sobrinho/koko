@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation
 class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : CustomPacketPayload {
     companion object {
         val ID: ResourceLocation = Koko.namespacePath("skills_payload")
-        val STREAM_CODEC = StreamCodec.of<RegistryFriendlyByteBuf, SyncSkillsPayload>(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SyncSkillsPayload> = StreamCodec.of<RegistryFriendlyByteBuf, SyncSkillsPayload>(
             { buf, payload ->
                 buf.writeVarInt(payload.skillData.size)
                 payload.skillData.forEach { (id, data) ->
@@ -37,7 +37,5 @@ class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : Custo
         val TYPE = CustomPacketPayload.Type<SyncSkillsPayload>(ID)
     }
 
-    override fun type(): CustomPacketPayload.Type<out CustomPacketPayload?> {
-        return TYPE
-    }
+    override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> = TYPE
 }

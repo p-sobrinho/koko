@@ -1,5 +1,4 @@
 plugins {
-    id "java"
     id 'java-library'
     id 'maven-publish'
     id 'idea'
@@ -17,19 +16,10 @@ repositories {
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
         content { includeGroup "thedarkcolour" }
     }
-    maven { url = "https://maven.firstdark.dev/snapshots" }
 }
 
 base {
     archivesName = mod_id
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs("src/main/java", "src/main/kotlin")
-        }
-    }
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -64,10 +54,9 @@ neoForge {
 
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
-
             logLevel = org.slf4j.event.Level.DEBUG
         }
-        }
+    }
 
     mods {
         "${mod_id}" {

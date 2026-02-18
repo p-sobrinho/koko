@@ -13,22 +13,18 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.ItemLore
 
 class SkillsScreen : Screen(Component.literal("Skills Screen")) {
-
     companion object {
-        // Texturas (convertido do "built-in(ui-mc:RECT)" e "built-in(ui-mc:BORDER)")
+        private const val MAX_SLOTS_PER_LINE = 6
+        private const val SLOT_SIZE = 20
+        private const val INITIAL_OFFSET_X = 15
+        private const val OFFSET_X = 4
+        private const val OFFSET_Y = 4
+
         private val BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/gui/demo_background.png")
         private val ITEM_STACK_CACHE = mutableMapOf<ResourceLocation, ItemStack>()
-
-        private val maxSlotsPerLine = 6
-        private val slotWidth = 20
-        private val slotHeight = 20
-        private val initialSpacement = 15
-        private val spacementPerItem = 4
-        private val spacementPerLine = 4
 
         private fun getItemStackFromRL(resourceLocation: ResourceLocation): ItemStack {
             return ITEM_STACK_CACHE.getOrPut(resourceLocation) { ItemStack(BuiltInRegistries.ITEM.get(resourceLocation)) }
@@ -37,6 +33,7 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
 
     private val xSize = 160
     private var ySize = 160
+
     private val skillSlots = mutableListOf<SkillSlot>()
 
     private var xPosition = 0
@@ -67,19 +64,16 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
         var i = 0
 
         for ((key, value) in allSkills) {
-            val line = i / maxSlotsPerLine
-            val collum = i % maxSlotsPerLine
+            val line = i / MAX_SLOTS_PER_LINE
+            val collum = i % MAX_SLOTS_PER_LINE
 
-            val x = xPosition + initialSpacement + (collum * (slotWidth + spacementPerItem))
-            val y = slotsStartY + (line * (slotHeight + spacementPerLine))
+            val x = xPosition + INITIAL_OFFSET_X + (collum * (SLOT_SIZE + OFFSET_X))
+            val y = slotsStartY + (line * (SLOT_SIZE + OFFSET_Y))
 
             val skillModel = SkillsHandler.getSkillModel(player, key)
+                ?: continue
 
-            skillSlots.add(SkillSlot(
-                x, y,
-                slotWidth, slotHeight,
-                key, value, skillModel
-            ))
+            skillSlots.add(SkillSlot(x, y, SLOT_SIZE, SLOT_SIZE, key, value, skillModel))
 
             i++
         }
@@ -128,7 +122,7 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
         }
     }
 
-    override fun isPauseScreen(): Boolean = false // Equivalente ao comportamento padrão
+    override fun isPauseScreen(): Boolean = false
 
     private class SkillSlot(
         val x: Int, val y: Int,

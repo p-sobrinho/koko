@@ -5,7 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.ktx.StreamCodecKTX
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.sources.AbstractSkillSource
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
+import net.minecraft.network.codec.StreamCodec
 
 data class SkillModel(
     val displayName: String, val icon: String, val description: String,
@@ -14,7 +16,7 @@ data class SkillModel(
     val skillSources: List<AbstractSkillSource>, val effects: List<AbstractSkillEffect>
 ) {
     companion object {
-        val CODEC = RecordCodecBuilder.create { instance ->
+        val CODEC: Codec<SkillModel> = RecordCodecBuilder.create { instance ->
             instance.group(
                 Codec.STRING.fieldOf("display_name").forGetter(SkillModel::displayName),
                 Codec.STRING.fieldOf("icon").forGetter(SkillModel::icon),
@@ -28,7 +30,7 @@ data class SkillModel(
             ).apply(instance, ::SkillModel)
         }
 
-        val STREAM_CODEC = StreamCodecKTX.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SkillModel> = StreamCodecKTX.composite(
             ByteBufCodecs.STRING_UTF8, SkillModel::displayName,
             ByteBufCodecs.STRING_UTF8, SkillModel::icon,
             ByteBufCodecs.STRING_UTF8, SkillModel::description,

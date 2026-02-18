@@ -1,8 +1,11 @@
 package dev.koji.koko.common.models.effects.filters
 
 import com.mojang.serialization.Codec
+import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
+import io.netty.buffer.ByteBuf
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
@@ -17,7 +20,7 @@ class RangeSkillEffectFilter(
     companion object {
         const val TYPE = "filter/range"
 
-        val CODEC = RecordCodecBuilder.mapCodec { instance ->
+        val CODEC: MapCodec<RangeSkillEffectFilter> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.INT.fieldOf("from").forGetter(RangeSkillEffectFilter::from),
                 Codec.INT.fieldOf("to").forGetter(RangeSkillEffectFilter::to),
@@ -26,7 +29,7 @@ class RangeSkillEffectFilter(
             ).apply(instance, ::RangeSkillEffectFilter)
         }
 
-        val STREAM_CODEC = StreamCodec.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, RangeSkillEffectFilter> = StreamCodec.composite(
             ByteBufCodecs.INT, RangeSkillEffectFilter::from,
             ByteBufCodecs.INT, RangeSkillEffectFilter::to,
             ByteBufCodecs.DOUBLE, RangeSkillEffectFilter::value,

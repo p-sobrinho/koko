@@ -1,8 +1,10 @@
 package dev.koji.koko.common.models.effects.filters
 
 import com.mojang.serialization.Codec
+import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
@@ -17,7 +19,7 @@ class AboveSkillEffectFilter(
     companion object {
         const val TYPE = "filter/above"
 
-        val CODEC = RecordCodecBuilder.mapCodec { instance ->
+        val CODEC: MapCodec<AboveSkillEffectFilter> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.INT.fieldOf("level").forGetter(AboveSkillEffectFilter::level),
                 Codec.DOUBLE.fieldOf("value").forGetter(AboveSkillEffectFilter::value),
@@ -25,7 +27,7 @@ class AboveSkillEffectFilter(
             ).apply(instance, ::AboveSkillEffectFilter)
         }
 
-        val STREAM_CODEC = StreamCodec.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, AboveSkillEffectFilter> = StreamCodec.composite(
             ByteBufCodecs.INT, AboveSkillEffectFilter::level,
             ByteBufCodecs.DOUBLE, AboveSkillEffectFilter::value,
             AttributeModifier.Operation.STREAM_CODEC, AboveSkillEffectFilter::operation,

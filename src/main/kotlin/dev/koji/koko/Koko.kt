@@ -1,7 +1,7 @@
 package dev.koji.koko
 
 import com.mojang.logging.LogUtils
-import dev.koji.koko.common.registry.AttachmentsRegistry
+import dev.koji.koko.common.CommonRegistry
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
@@ -21,7 +21,7 @@ class Koko {
     constructor(modEventBus: IEventBus, modContainer: ModContainer) {
         LOGGER.info("Koko is loading...")
 
-        AttachmentsRegistry.register(modEventBus)
+        CommonRegistry.register(modEventBus)
 
         LOGGER.info("Koko has been successfully loaded.")
     }

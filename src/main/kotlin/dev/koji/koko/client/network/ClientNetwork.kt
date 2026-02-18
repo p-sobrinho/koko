@@ -1,4 +1,4 @@
-package dev.koji.koko.common.network
+package dev.koji.koko.client.network
 
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
@@ -9,13 +9,13 @@ import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 
-@EventBusSubscriber(modid = Koko.MOD_ID)
+@EventBusSubscriber(modid = Koko.Companion.MOD_ID)
 object ClientNetwork {
     @SubscribeEvent
     fun registerPayloadHandlers(event: RegisterPayloadHandlersEvent) {
-        val registrar = event.registrar(Koko.namespacePath("payloaders").toString())
+        val registrar = event.registrar(Koko.Companion.namespacePath("payloaders").toString())
 
-        registrar.playToClient(SyncSkillsPayload.TYPE, SyncSkillsPayload.STREAM_CODEC) { payload, context ->
+        registrar.playToClient(SyncSkillsPayload.Companion.TYPE, SyncSkillsPayload.Companion.STREAM_CODEC) { payload, _ ->
             val minecraft = Minecraft.getInstance()
             minecraft.execute {
                 val player = minecraft.player ?: return@execute
@@ -24,7 +24,7 @@ object ClientNetwork {
             }
         }
 
-        registrar.playToClient(SyncSkillPayload.TYPE, SyncSkillPayload.STREAM_CODEC) { payload, context ->
+        registrar.playToClient(SyncSkillPayload.Companion.TYPE, SyncSkillPayload.Companion.STREAM_CODEC) { payload, _ ->
             val minecraft = Minecraft.getInstance()
 
             minecraft.execute {

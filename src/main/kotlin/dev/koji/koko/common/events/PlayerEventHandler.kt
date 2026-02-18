@@ -1,5 +1,6 @@
 package dev.koji.koko.common.events
 
+import dev.koji.koko.common.SkillsHandler
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
@@ -16,6 +17,7 @@ import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.AnvilUpdateEvent
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import java.time.Instant
@@ -31,6 +33,15 @@ object PlayerEventHandler {
     private val BLOCKED_PLAYER_FORGE = HashMap<UUID, MutableSet<ResourceLocation>>()
 
     private val MESSAGES_COOLDOWNS = HashMap<EventMessage, Instant>()
+
+    @SubscribeEvent
+    fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) = this.doPlayerStuff(event.entity)
+
+    @SubscribeEvent
+    fun onPlayerRespawn(event: PlayerEvent.PlayerRespawnEvent) = this.doPlayerStuff(event.entity)
+
+    @SubscribeEvent
+    fun onPlayerChangedDimension(event: PlayerEvent.PlayerChangedDimensionEvent) = this.doPlayerStuff(event.entity)
 
     @SubscribeEvent
     fun onItemUse(event: PlayerInteractEvent.RightClickItem) {
@@ -188,6 +199,12 @@ object PlayerEventHandler {
         }
 
         return blockedItems
+    }
+
+    private fun doPlayerStuff(player: Player) {
+        SkillsHandler.syncNewSkills(player)
+        SkillsHandler.syncPlayerSkills(player)
+        SkillsHandler.syncEffects(player)
     }
 
     private fun returnIngredients(inventory: Container, player: Player) {

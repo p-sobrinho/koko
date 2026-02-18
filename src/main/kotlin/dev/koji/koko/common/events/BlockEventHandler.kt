@@ -7,7 +7,6 @@ import dev.koji.koko.common.models.sources.DefaultSources
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.tags.TagKey
 import net.minecraft.world.level.block.state.BlockState
@@ -18,21 +17,20 @@ import net.neoforged.neoforge.event.level.BlockEvent
 
 @EventBusSubscriber(modid = Koko.MOD_ID)
 object BlockEventHandler {
-
     @SubscribeEvent
     fun onBlockPlace(event: BlockEvent.EntityPlaceEvent) {
         if (event.level.isClientSide) return
 
         val player = (event.entity as? ServerPlayer) ?: return
 
-        processBlockEvaluation(DefaultSources.BLOCK_PLACE, event.state, player)
+        this.processBlockEvaluation(DefaultSources.BLOCK_PLACE, event.state, player)
     }
 
     @SubscribeEvent
     fun onBlockInteract(event: PlayerInteractEvent.RightClickBlock) {
         if (event.level.isClientSide) return
 
-        processBlockEvaluation(
+        this.processBlockEvaluation(
             DefaultSources.BLOCK_INTERACT,
             event.level.getBlockState(event.pos),
             event.entity as ServerPlayer
@@ -43,7 +41,7 @@ object BlockEventHandler {
     fun onBlockBreak(event: BlockEvent.BreakEvent) {
         if (event.level.isClientSide) return
 
-        processBlockEvaluation(DefaultSources.BLOCK_BREAK, event.state, event.player as ServerPlayer)
+        this.processBlockEvaluation(DefaultSources.BLOCK_BREAK, event.state, event.player as ServerPlayer)
     }
 
     fun processBlockEvaluation(source: String, blockState: BlockState, player: ServerPlayer) {
@@ -57,6 +55,7 @@ object BlockEventHandler {
             SkillsHandler.updateXp(player, listener.skill, xp)
         }
     }
+
     fun blockEvaluate(skillModel: AbstractSkillSource, blockState: BlockState): Double =
         blockEvaluate(skillModel.filters, blockState)
 
@@ -88,13 +87,8 @@ object BlockEventHandler {
         return 0.0
     }
 
-    private fun matches(blockState: BlockState, target: String): Boolean {
-        val resourceLocation = if (target.contains(":")) {
-            ResourceLocation.parse(target)
-        } else {
-            ResourceLocation.fromNamespaceAndPath("minecraft", target)
-        }
-
+    private fun matches(blockState: BlockState, targetLocation: String): Boolean {
+        val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
         val tagKey = TagKey.create(Registries.BLOCK, resourceLocation)
 
         return (blockState.`is`(tagKey) || blockState.`is`(ResourceKey.create(Registries.BLOCK, resourceLocation)))

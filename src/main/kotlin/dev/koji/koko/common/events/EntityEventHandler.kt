@@ -30,20 +30,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 @EventBusSubscriber(modid = Koko.MOD_ID)
 object EntityEventHandler {
     @SubscribeEvent
-    fun onEntityDeath(event: LivingDeathEvent) {
-        if (event.entity.level().isClientSide) return
-
-        val source = event.source
-        val attacker = source.entity
-
-        if (attacker !is ServerPlayer) return
-
-        val killedEntity = event.entity
-
-        processEntityEvaluation(DefaultSources.ENTITY_KILL, killedEntity, attacker)
-    }
-
-    @SubscribeEvent
     fun onEntityInteract(event: PlayerInteractEvent.EntityInteract) {
         if (event.entity.level().isClientSide) return
 
@@ -52,7 +38,7 @@ object EntityEventHandler {
 
         if (player !is ServerPlayer) return
 
-        processEntityEvaluation("entity/interact", targetEntity, player)
+        this.processEntityEvaluation(DefaultSources.ENTITY_INTERACT, targetEntity, player)
     }
 
     @SubscribeEvent
@@ -65,7 +51,7 @@ object EntityEventHandler {
 
         if (container !is Entity || player !is ServerPlayer) return
 
-        processEntityEvaluation("entity/trade", container, player)
+        this.processEntityEvaluation(DefaultSources.ENTITY_TRADE, container, player)
     }
 
     @SubscribeEvent
@@ -78,7 +64,21 @@ object EntityEventHandler {
 
         if (player !is ServerPlayer) return
 
-        processEntityEvaluation("entity/tame", tamedEntity, player)
+        this.processEntityEvaluation(DefaultSources.ENTITY_TAME, tamedEntity, player)
+    }
+
+    @SubscribeEvent
+    fun onEntityDeath(event: LivingDeathEvent) {
+        if (event.entity.level().isClientSide) return
+
+        val source = event.source
+        val attacker = source.entity
+
+        if (attacker !is ServerPlayer) return
+
+        val killedEntity = event.entity
+
+        this.processEntityEvaluation(DefaultSources.ENTITY_KILL, killedEntity, attacker)
     }
 
     fun processEntityEvaluation(

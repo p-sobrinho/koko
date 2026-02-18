@@ -17,7 +17,7 @@ data class SkillSourceFilter(
         WHITELIST, BLACKLIST;
 
         companion object{
-            val CODEC = StringRepresentable.fromEnum(FilterType::values)
+            val CODEC: StringRepresentable.EnumCodec<FilterType> = StringRepresentable.fromEnum(FilterType::values)
 
             val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, FilterType> = NeoForgeStreamCodecs.enumCodec(
                 FilterType::class.java
@@ -30,7 +30,7 @@ data class SkillSourceFilter(
     }
 
     companion object {
-        val CODEC = RecordCodecBuilder.create { instance ->
+        val CODEC: Codec<SkillSourceFilter> = RecordCodecBuilder.create { instance ->
             instance.group(
                 FilterType.CODEC.fieldOf("type").forGetter(SkillSourceFilter::type),
                 Codec.STRING.fieldOf("target").forGetter(SkillSourceFilter::target),
@@ -40,7 +40,7 @@ data class SkillSourceFilter(
             ).apply(instance, ::SkillSourceFilter)
         }
 
-        val STREAM_CODEC = StreamCodec.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SkillSourceFilter> = StreamCodec.composite(
             FilterType.STREAM_CODEC, SkillSourceFilter::type,
             ByteBufCodecs.STRING_UTF8, SkillSourceFilter::target,
             ByteBufCodecs.VAR_INT, SkillSourceFilter::priority,
