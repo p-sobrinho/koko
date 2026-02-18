@@ -18,9 +18,9 @@ data class SkillModel(
             instance.group(
                 Codec.STRING.fieldOf("display_name").forGetter(SkillModel::displayName),
                 Codec.STRING.fieldOf("icon").forGetter(SkillModel::icon),
-                Codec.STRING.fieldOf("description").forGetter(SkillModel::displayName),
+                Codec.STRING.fieldOf("description").forGetter(SkillModel::description),
                 Codec.INT.fieldOf("min_level").forGetter(SkillModel::minLevel),
-                Codec.DOUBLE.fieldOf("default_level").forGetter(SkillModel::defaultXp),
+                Codec.DOUBLE.fieldOf("default_xp").forGetter(SkillModel::defaultXp),
                 Codec.INT.fieldOf("max_level").forGetter(SkillModel::maxLevel),
                 Codec.INT.fieldOf("overclocked_max_level").forGetter(SkillModel::overClockedMaxLevel),
                 AbstractSkillSource.CODEC.listOf().optionalFieldOf("sources", listOf()).forGetter(SkillModel::skillSources),
