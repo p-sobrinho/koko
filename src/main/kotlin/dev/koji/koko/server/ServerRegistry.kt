@@ -68,7 +68,7 @@ object ServerRegistry {
         SkillsHandler.updateXp(player, namespacePath, amount * multiplier)
 
         commandStack.source.sendSuccess({
-            Component.literal("Edited ${player.name} experience of $skill from $beforeXp to ${playerSkill.xp}!")
+            Component.literal("Edited ${player.name.string} experience of $skill from $beforeXp to ${beforeXp + amount * multiplier}!")
         }, false)
 
         return 1

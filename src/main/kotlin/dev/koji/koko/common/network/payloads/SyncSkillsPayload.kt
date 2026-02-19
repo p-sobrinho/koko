@@ -24,9 +24,9 @@ class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : Custo
                 val size = buf.readVarInt()
                 val map = HashMap<ResourceLocation, SkillData>()
 
-                for (ignored in 0 ..size) {
-                    val id = buf.readResourceLocation()
-                    val data = ByteBufCodecs.fromCodec(SkillData.CODEC).decode(buf)
+                for (ignored in 0..<size) {
+                    val id: ResourceLocation = buf.readResourceLocation()
+                    val data: SkillData = ByteBufCodecs.fromCodec(SkillData.CODEC).decode(buf)
 
                     map[id] = data
                 }

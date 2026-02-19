@@ -70,7 +70,7 @@ object SkillsHandler {
 
         val currentXp = playerSkill.xp
 
-        Koko.LOGGER.debug("Updating {} xp of skill {} from {} to {}.", player.name, currentXp, skill, currentXp + amount)
+        Koko.LOGGER.debug("Updating {} xp of skill {} from {} to {}.", player.name.string, currentXp, skill, currentXp + amount)
 
         val skillModel = this.getSkillModel(player.level(), skill)
             ?: return Koko.LOGGER.warn("Unable to find skill model for location $skill!")
@@ -81,7 +81,7 @@ object SkillsHandler {
         if (this.getLevel(player, skill) == maxLevel) {
             playerSkill.xp = maxXp
         } else {
-            playerSkill.xp += maxXp.coerceAtMost(playerSkill.xp)
+            playerSkill.xp += maxXp.coerceAtMost(amount)
         }
 
         PacketDistributor.sendToPlayer(player as ServerPlayer, SyncSkillPayload(skill, playerSkill))
