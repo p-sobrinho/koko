@@ -32,7 +32,11 @@ class AttributeSkillEffect(
         return when (applicableFilters.size) {
             0 -> null
             1 -> applicableFilters.first()
-            else -> throw IllegalArgumentException("Filter overlapping is not supported.")
+            else -> {
+                Koko.LOGGER.warn("Filter overlapping is not supported.")
+
+                applicableFilters.first()
+            }
         }
     }
 

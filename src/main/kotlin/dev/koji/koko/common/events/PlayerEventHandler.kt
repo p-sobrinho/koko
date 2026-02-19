@@ -25,6 +25,8 @@ import net.neoforged.neoforge.event.entity.player.AttackEntityEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.event.tick.PlayerTickEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
 import java.time.Instant
 import java.util.*
 
@@ -47,6 +49,18 @@ object PlayerEventHandler {
 
     @SubscribeEvent
     fun onPlayerChangedDimension(event: PlayerEvent.PlayerChangedDimensionEvent) = this.doPlayerStuff(event.entity)
+
+    @SubscribeEvent
+    fun onPlayerTick(event: PlayerTickEvent.Post) {
+        val player = event.entity
+        val level = player.level()
+
+        if (level.isClientSide) return
+
+        if (level.gameTime % 20 != 0L) return
+
+        SkillsHandler.syncEffects(player)
+    }
 
     @SubscribeEvent
     fun onItemUse(event: PlayerInteractEvent.RightClickItem) {
@@ -255,7 +269,7 @@ object PlayerEventHandler {
     fun isItemBlockedFor(player: Player, item: ItemStack, scope: BlockScope): Boolean {
         if (item.isEmpty) return false
 
-        return isItemBlockedFor(player.uuid, item, scope)
+        return this.isItemBlockedFor(player.uuid, item, scope)
     }
 
     fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: BlockScope): Boolean {

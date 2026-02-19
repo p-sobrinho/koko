@@ -69,15 +69,13 @@ object BlockEventHandler {
             .sortedByDescending { it.priority }
 
         for (blacklist in blacklists) {
-            if (blockMatches(blockState, blacklist.target)) {
-                return 0.0
-            }
+            if (this.blockMatches(blockState, blacklist.target)) return 0.0
         }
 
         if (whitelists.isEmpty()) return 0.0
 
         for (whitelist in whitelists) {
-            if (blockMatches(blockState, whitelist.target)) {
+            if (this.blockMatches(blockState, whitelist.target)) {
                 val xp = whitelist.xp
 
                 return if (whitelist.inverse) -xp else xp

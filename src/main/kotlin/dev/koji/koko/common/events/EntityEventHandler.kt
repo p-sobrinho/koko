@@ -110,16 +110,15 @@ object EntityEventHandler {
             .sortedByDescending { it.priority }
 
         for (blacklist in blacklists) {
-            if (entityMatches(entity, blacklist.target)) {
-                return 0.0
-            }
+            if (this.entityMatches(entity, blacklist.target)) return 0.0
         }
 
         if (whitelists.isEmpty()) return 0.0
 
         for (whitelist in whitelists) {
-            if (entityMatches(entity, whitelist.target)) {
+            if (this.entityMatches(entity, whitelist.target)) {
                 val xp = whitelist.xp
+
                 return if (whitelist.inverse) -xp else xp
             }
         }
