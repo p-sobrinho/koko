@@ -3,7 +3,7 @@ package dev.koji.koko.common.events
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.models.sources.AbstractSkillSource
-import dev.koji.koko.common.models.sources.DefaultSources
+import dev.koji.koko.common.models.sources.Sources
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
@@ -23,7 +23,7 @@ object BlockEventHandler {
 
         val player = (event.entity as? ServerPlayer) ?: return
 
-        this.processBlockEvaluation(DefaultSources.BLOCK_PLACE, event.state, player)
+        this.processBlockEvaluation(Sources.BLOCK_PLACE, event.state, player)
     }
 
     @SubscribeEvent
@@ -31,7 +31,7 @@ object BlockEventHandler {
         if (event.level.isClientSide) return
 
         this.processBlockEvaluation(
-            DefaultSources.BLOCK_INTERACT,
+            Sources.BLOCK_INTERACT,
             event.level.getBlockState(event.pos),
             event.entity as ServerPlayer
         )
@@ -41,7 +41,7 @@ object BlockEventHandler {
     fun onBlockBreak(event: BlockEvent.BreakEvent) {
         if (event.level.isClientSide) return
 
-        this.processBlockEvaluation(DefaultSources.BLOCK_BREAK, event.state, event.player as ServerPlayer)
+        this.processBlockEvaluation(Sources.BLOCK_BREAK, event.state, event.player as ServerPlayer)
     }
 
     fun processBlockEvaluation(source: String, blockState: BlockState, player: ServerPlayer) {
@@ -69,7 +69,7 @@ object BlockEventHandler {
             .sortedByDescending { it.priority }
 
         for (blacklist in blacklists) {
-            if (matches(blockState, blacklist.target)) {
+            if (blockMatches(blockState, blacklist.target)) {
                 return 0.0
             }
         }
@@ -77,7 +77,7 @@ object BlockEventHandler {
         if (whitelists.isEmpty()) return 0.0
 
         for (whitelist in whitelists) {
-            if (matches(blockState, whitelist.target)) {
+            if (blockMatches(blockState, whitelist.target)) {
                 val xp = whitelist.xp
 
                 return if (whitelist.inverse) -xp else xp
@@ -87,7 +87,7 @@ object BlockEventHandler {
         return 0.0
     }
 
-    private fun matches(blockState: BlockState, targetLocation: String): Boolean {
+    private fun blockMatches(blockState: BlockState, targetLocation: String): Boolean {
         val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
         val tagKey = TagKey.create(Registries.BLOCK, resourceLocation)
 

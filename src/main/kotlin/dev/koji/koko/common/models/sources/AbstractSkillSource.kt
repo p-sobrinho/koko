@@ -7,6 +7,7 @@ import dev.koji.koko.common.models.sources.block.BlockInteractSource
 import dev.koji.koko.common.models.sources.block.BlockPlaceSource
 import dev.koji.koko.common.models.sources.entity.EntityInteractSource
 import dev.koji.koko.common.models.sources.entity.EntityKillSource
+import dev.koji.koko.common.models.sources.entity.EntityTameSource
 import dev.koji.koko.common.models.sources.player.*
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
@@ -14,6 +15,7 @@ import net.minecraft.network.codec.StreamCodec
 
 abstract class AbstractSkillSource {
     abstract val filters: List<SkillSourceFilter>
+    abstract val alwaysApply: Boolean
     abstract val type: String
 
     companion object {
@@ -43,31 +45,35 @@ abstract class AbstractSkillSource {
             )
 
         val codecsMapper = mapOf<String, MapCodec<out AbstractSkillSource>>(
-            BlockPlaceSource.TYPE to BlockPlaceSource.CODEC,
-            BlockBreakSource.TYPE to BlockBreakSource.CODEC,
-            BlockInteractSource.TYPE to BlockInteractSource.CODEC,
-            EntityInteractSource.TYPE to EntityInteractSource.CODEC,
-            EntityKillSource.TYPE to EntityKillSource.CODEC,
-            PlayerRunSource.TYPE to PlayerRunSource.CODEC,
-            PlayerJumpSource.TYPE to PlayerJumpSource.CODEC,
-            PlayerTradeSource.TYPE to PlayerTradeSource.CODEC,
-            PlayerStackDropSource.TYPE to PlayerStackDropSource.CODEC,
-            PlayerDamagedSource.TYPE to PlayerDamagedSource.CODEC,
-            PlayerDiedSource.TYPE to PlayerDiedSource.CODEC
+            Sources.BLOCK_PLACE to BlockPlaceSource.CODEC,
+            Sources.BLOCK_INTERACT to BlockBreakSource.CODEC,
+            Sources.BLOCK_BREAK to BlockInteractSource.CODEC,
+            Sources.ENTITY_INTERACT to EntityInteractSource.CODEC,
+            Sources.ENTITY_TAME to EntityTameSource.CODEC,
+            Sources.ENTITY_KILL to EntityKillSource.CODEC,
+            Sources.PLAYER_RUN to PlayerRunSource.CODEC,
+            Sources.PLAYER_JUMP to PlayerJumpSource.CODEC,
+            Sources.PLAYER_CRAFTED to PlayerCraftedSource.CODEC,
+            Sources.PLAYER_TRADE to PlayerTradeSource.CODEC,
+            Sources.PLAYER_STACK_DROP to PlayerStackDropSource.CODEC,
+            Sources.PLAYER_DAMAGED to PlayerDamagedSource.CODEC,
+            Sources.PLAYER_DIED to PlayerDiedSource.CODEC
         )
 
         val streamCodecsMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillSource>>(
-            BlockPlaceSource.TYPE to BlockPlaceSource.STREAM_CODEC,
-            BlockBreakSource.TYPE to BlockBreakSource.STREAM_CODEC,
-            BlockInteractSource.TYPE to BlockInteractSource.STREAM_CODEC,
-            EntityInteractSource.TYPE to EntityInteractSource.STREAM_CODEC,
-            EntityKillSource.TYPE to EntityKillSource.STREAM_CODEC,
-            PlayerRunSource.TYPE to PlayerRunSource.STREAM_CODEC,
-            PlayerJumpSource.TYPE to PlayerJumpSource.STREAM_CODEC,
-            PlayerTradeSource.TYPE to PlayerTradeSource.STREAM_CODEC,
-            PlayerStackDropSource.TYPE to PlayerStackDropSource.STREAM_CODEC,
-            PlayerDamagedSource.TYPE to PlayerDamagedSource.STREAM_CODEC,
-            PlayerDiedSource.TYPE to PlayerDiedSource.STREAM_CODEC
+            Sources.BLOCK_PLACE to BlockPlaceSource.STREAM_CODEC,
+            Sources.BLOCK_INTERACT to BlockBreakSource.STREAM_CODEC,
+            Sources.BLOCK_BREAK to BlockInteractSource.STREAM_CODEC,
+            Sources.ENTITY_INTERACT to EntityInteractSource.STREAM_CODEC,
+            Sources.ENTITY_TAME to EntityTameSource.STREAM_CODEC,
+            Sources.ENTITY_KILL to EntityKillSource.STREAM_CODEC,
+            Sources.PLAYER_RUN to PlayerRunSource.STREAM_CODEC,
+            Sources.PLAYER_JUMP to PlayerJumpSource.STREAM_CODEC,
+            Sources.PLAYER_CRAFTED to PlayerCraftedSource.STREAM_CODEC,
+            Sources.PLAYER_TRADE to PlayerTradeSource.STREAM_CODEC,
+            Sources.PLAYER_STACK_DROP to PlayerStackDropSource.STREAM_CODEC,
+            Sources.PLAYER_DAMAGED to PlayerDamagedSource.STREAM_CODEC,
+            Sources.PLAYER_DIED to PlayerDiedSource.STREAM_CODEC
         )
     }
 }

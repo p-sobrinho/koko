@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
+import dev.koji.koko.common.models.effects.Filters
 import io.netty.buffer.ByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
@@ -13,13 +14,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier
 class BellowSkillEffectFilter(
     val level: Int, val value: Double, val operation: AttributeModifier.Operation
 ): AbstractSkillEffectFilter() {
-    override val type: String = TYPE
+    override val type: String = Filters.BELLOW
 
     override fun apply(level: Int): Boolean = (level <= this.level)
 
     companion object {
-        const val TYPE = "filter/bellow"
-
         val CODEC: MapCodec<BellowSkillEffectFilter> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.INT.fieldOf("level").forGetter(BellowSkillEffectFilter::level),

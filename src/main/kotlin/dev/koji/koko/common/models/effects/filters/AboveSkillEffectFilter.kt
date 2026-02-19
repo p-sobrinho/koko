@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
+import dev.koji.koko.common.models.effects.Effects
+import dev.koji.koko.common.models.effects.Filters
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
@@ -12,13 +14,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier
 class AboveSkillEffectFilter(
     val level: Int, val value: Double, val operation: AttributeModifier.Operation
 ): AbstractSkillEffectFilter() {
-    override val type: String = TYPE
+    override val type: String = Filters.ABOVE
 
     override fun apply(level: Int): Boolean = (level >= this.level)
 
     companion object {
-        const val TYPE = "filter/above"
-
         val CODEC: MapCodec<AboveSkillEffectFilter> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.INT.fieldOf("level").forGetter(AboveSkillEffectFilter::level),

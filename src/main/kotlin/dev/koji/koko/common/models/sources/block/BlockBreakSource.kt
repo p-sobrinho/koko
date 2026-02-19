@@ -3,7 +3,7 @@ package dev.koji.koko.common.models.sources.block
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.sources.AbstractSkillSource
-import dev.koji.koko.common.models.sources.DefaultSources
+import dev.koji.koko.common.models.sources.Sources
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
@@ -12,7 +12,7 @@ import net.minecraft.network.codec.StreamCodec
 class BlockBreakSource(
     override val filters: List<SkillSourceFilter>
 ) : AbstractSkillSource() {
-    override val type: String = DefaultSources.BLOCK_BREAK
+    override val type: String = Sources.BLOCK_BREAK
     companion object {
         val CODEC: MapCodec<BlockBreakSource> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(

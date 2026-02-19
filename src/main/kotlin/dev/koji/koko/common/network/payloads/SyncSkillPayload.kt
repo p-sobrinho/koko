@@ -10,8 +10,6 @@ import net.minecraft.resources.ResourceLocation
 
 class SyncSkillPayload(val skill: ResourceLocation, val skillData: SkillData) : CustomPacketPayload {
     companion object {
-        val ID = Koko.namespacePath("skill_payload")
-
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SyncSkillPayload> = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC,
             SyncSkillPayload::skill,
@@ -20,7 +18,7 @@ class SyncSkillPayload(val skill: ResourceLocation, val skillData: SkillData) : 
             ::SyncSkillPayload
         )
 
-        val TYPE = CustomPacketPayload.Type<SyncSkillPayload>(ID)
+        val TYPE = CustomPacketPayload.Type<SyncSkillPayload>(Koko.namespacePath("skill_payload"))
     }
 
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> = TYPE

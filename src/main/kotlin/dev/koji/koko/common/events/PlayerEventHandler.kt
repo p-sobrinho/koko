@@ -1,21 +1,30 @@
 package dev.koji.koko.common.events
 
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.events.EntityEventHandler.matchesEntity
+import dev.koji.koko.common.models.sources.AbstractSkillSource
+import dev.koji.koko.common.models.sources.SkillSourceFilter
+import dev.koji.koko.common.models.sources.Sources
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.TagKey
 import net.minecraft.world.Container
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.AnvilUpdateEvent
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent
+import net.neoforged.neoforge.event.entity.player.AnvilRepairEvent
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
@@ -46,38 +55,58 @@ object PlayerEventHandler {
     @SubscribeEvent
     fun onItemUse(event: PlayerInteractEvent.RightClickItem) {
         val player = event.entity
+        val item = player.mainHandItem
 
-        if (!this.isItemBlockedFor(player, player.mainHandItem, BlockScope.USE)) return
+        if (this.isItemBlockedFor(player, item, BlockScope.USE)){
+            event.isCanceled = true
 
-        event.isCanceled = true
+            if (!player.level().isClientSide) return
 
-        if (!player.level().isClientSide) return
+            this.triggerMessage(player, EventMessage.UNABLE_TO_USE)
+        }
 
-        this.triggerMessage(player, EventMessage.UNABLE_TO_USE)
+        if (player.level().isClientSide) return
+
+        this.processPlayerEvaluate(Sources.PLAYER_ITEM_USE, item, player as ServerPlayer)
     }
 
     @SubscribeEvent
     fun onItemAttack(event: AttackEntityEvent) {
         val player = event.entity
+        val item = player.mainHandItem
 
-        if (!this.isItemBlockedFor(player, player.mainHandItem, BlockScope.ATTACK)) return
+        if (this.isItemBlockedFor(player, item, BlockScope.ATTACK)) {
+            event.isCanceled = true
 
-        event.isCanceled = true
+            if (!player.level().isClientSide) return
 
-        if (!player.level().isClientSide) return
-        this.triggerMessage(player, EventMessage.UNABLE_TO_ATTACK)
+            this.triggerMessage(player, EventMessage.UNABLE_TO_ATTACK)
+        }
+
+        if (player.level().isClientSide) return
+
+        this.processPlayerEvaluate(Sources.PLAYER_ATTACKED, item, player as ServerPlayer)
     }
 
     @SubscribeEvent
     fun onItemConsume(event: LivingEntityUseItemEvent.Start) {
         val player = (event.entity as? Player) ?: return
+        val item = event.item
 
-        if (!this.isItemBlockedFor(player, event.item, BlockScope.CONSUME)) return
+        if (this.isItemBlockedFor(player, item, BlockScope.CONSUME)) {
 
-        event.isCanceled = true
+            event.isCanceled = true
 
-        if (!player.level().isClientSide) return
-        this.triggerMessage(player, EventMessage.UNABLE_TO_CONSUME)
+            if (!player.level().isClientSide) return
+
+            this.triggerMessage(player, EventMessage.UNABLE_TO_CONSUME)
+
+            return
+        }
+
+        if (player.level().isClientSide) return
+
+        this.processPlayerEvaluate(Sources.PLAYER_CONSUMED, item, player as ServerPlayer)
     }
 
     @SubscribeEvent
@@ -85,30 +114,90 @@ object PlayerEventHandler {
         val player = event.entity
         val result = event.crafting
 
-        if (!this.isItemBlockedFor(player, result, BlockScope.CRAFT)) return
+        if (this.isItemBlockedFor(player, result, BlockScope.CRAFT)) {
 
-        result.count = 0
+            result.count = 0
 
-        if (player.level().isClientSide) {
-            this.triggerMessage(player, EventMessage.UNABLE_TO_CRAFT)
+            if (player.level().isClientSide) {
+                this.triggerMessage(player, EventMessage.UNABLE_TO_CRAFT)
 
-            spawnDenyParticles(player)
-            playDenySound(player)
-        } else { returnIngredients(event.inventory, player) }
+                this.spawnDenyParticles(player)
+                this.playDenySound(player)
+            } else { this.returnIngredients(event.inventory, player) }
+
+            return
+        }
+
+        if (player.level().isClientSide) return
+
+        this.processPlayerEvaluate(Sources.PLAYER_CRAFTED, result, player as ServerPlayer)
+    }
+
+    @SubscribeEvent
+    fun onAnvilRepair(event: AnvilRepairEvent) {
+        val player = event.entity
+
+        if (player.level().isClientSide) return
+
+        this.processPlayerEvaluate(Sources.PLAYER_FORGED, event.output, player as ServerPlayer)
     }
 
     @SubscribeEvent
     fun onAnvilUpdate(event: AnvilUpdateEvent) {
         val player = event.player
 
-        if (!this.isItemBlockedFor(player, event.left, BlockScope.FORGE))
-            return
+        if (!this.isItemBlockedFor(player, event.left, BlockScope.FORGE)) return
 
         event.isCanceled = true
 
         if (!player.level().isClientSide) return
 
         this.triggerMessage(player, EventMessage.UNABLE_TO_FORGE)
+    }
+
+    fun processPlayerEvaluate(
+        source: String,
+        item: ItemStack,
+        player: ServerPlayer
+    ) {
+        val listeners = SkillsHandler.getListenersFor(source, player.level())
+
+        for (listener in listeners) {
+            val xp = this.playerActionEvaluate(listener.sourceData, item)
+
+            if (xp == 0.0) continue
+
+            SkillsHandler.updateXp(player, listener.skill, xp)
+        }
+    }
+
+    fun playerActionEvaluate(skillModel: AbstractSkillSource, item: ItemStack): Double =
+        playerActionEvaluate(skillModel.filters, item)
+
+    fun playerActionEvaluate(filters: List<SkillSourceFilter>, item: ItemStack): Double {
+        if (filters.isEmpty()) return 0.0
+
+        val whitelists = filters.filter { it.type == SkillSourceFilter.FilterType.WHITELIST }
+            .sortedByDescending { it.priority }
+
+        val blacklists = filters.filter { it.type == SkillSourceFilter.FilterType.BLACKLIST }
+            .sortedByDescending { it.priority }
+
+        for (blacklist in blacklists) {
+            if (this.itemMatches(item, blacklist.target)) return 0.0
+        }
+
+        if (whitelists.isEmpty()) return 0.0
+
+        for (whitelist in whitelists) {
+            if (this.itemMatches(item, whitelist.target)) {
+                val xp = whitelist.xp
+
+                return if (whitelist.inverse) -xp else xp
+            }
+        }
+
+        return 0.0
     }
 
     fun addBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
@@ -205,6 +294,18 @@ object PlayerEventHandler {
         SkillsHandler.syncNewSkills(player)
         SkillsHandler.syncPlayerSkills(player)
         SkillsHandler.syncEffects(player)
+    }
+
+    private fun itemMatches(item: ItemStack, targetLocation: String): Boolean {
+        val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
+
+        if (item.`is`(TagKey.create(Registries.ITEM, resourceLocation))) return true
+
+        val keyOptional = item.itemHolder.unwrapKey()
+
+        if (keyOptional.isEmpty) return false
+
+        return keyOptional.get().location() == resourceLocation
     }
 
     private fun returnIngredients(inventory: Container, player: Player) {

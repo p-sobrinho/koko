@@ -3,7 +3,7 @@ package dev.koji.koko.common.events
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.models.sources.AbstractSkillSource
-import dev.koji.koko.common.models.sources.DefaultSources
+import dev.koji.koko.common.models.sources.Sources
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
@@ -38,7 +38,7 @@ object EntityEventHandler {
 
         if (player !is ServerPlayer) return
 
-        this.processEntityEvaluation(DefaultSources.ENTITY_INTERACT, targetEntity, player)
+        this.processEntityEvaluation(Sources.ENTITY_INTERACT, targetEntity, player)
     }
 
     @SubscribeEvent
@@ -51,7 +51,7 @@ object EntityEventHandler {
 
         if (container !is Entity || player !is ServerPlayer) return
 
-        this.processEntityEvaluation(DefaultSources.ENTITY_TRADE, container, player)
+        this.processEntityEvaluation(Sources.PLAYER_TRADE, container, player)
     }
 
     @SubscribeEvent
@@ -64,7 +64,7 @@ object EntityEventHandler {
 
         if (player !is ServerPlayer) return
 
-        this.processEntityEvaluation(DefaultSources.ENTITY_TAME, tamedEntity, player)
+        this.processEntityEvaluation(Sources.ENTITY_TAME, tamedEntity, player)
     }
 
     @SubscribeEvent
@@ -78,7 +78,7 @@ object EntityEventHandler {
 
         val killedEntity = event.entity
 
-        this.processEntityEvaluation(DefaultSources.ENTITY_KILL, killedEntity, attacker)
+        this.processEntityEvaluation(Sources.ENTITY_KILL, killedEntity, attacker)
     }
 
     fun processEntityEvaluation(
@@ -110,7 +110,7 @@ object EntityEventHandler {
             .sortedByDescending { it.priority }
 
         for (blacklist in blacklists) {
-            if (matchesEntity(entity, blacklist.target)) {
+            if (entityMatches(entity, blacklist.target)) {
                 return 0.0
             }
         }
@@ -118,7 +118,7 @@ object EntityEventHandler {
         if (whitelists.isEmpty()) return 0.0
 
         for (whitelist in whitelists) {
-            if (matchesEntity(entity, whitelist.target)) {
+            if (entityMatches(entity, whitelist.target)) {
                 val xp = whitelist.xp
                 return if (whitelist.inverse) -xp else xp
             }
@@ -127,7 +127,7 @@ object EntityEventHandler {
         return 0.0
     }
 
-    private fun matchesEntity(entity: Entity, target: String): Boolean {
+    private fun entityMatches(entity: Entity, target: String): Boolean {
         val resourceLocation = if (target.contains(":")) {
             ResourceLocation.parse(target)
         } else {

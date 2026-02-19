@@ -10,11 +10,11 @@ import net.minecraft.resources.ResourceLocation
 
 class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : CustomPacketPayload {
     companion object {
-        val ID: ResourceLocation = Koko.namespacePath("skills_payload")
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SyncSkillsPayload> = StreamCodec.of<RegistryFriendlyByteBuf, SyncSkillsPayload>(
             { buf, payload ->
                 buf.writeVarInt(payload.skillData.size)
-                payload.skillData.forEach { (id, data) ->
+
+                for ((id, data) in payload.skillData) {
                     buf.writeResourceLocation(id)
 
                     ByteBufCodecs.fromCodec(SkillData.CODEC).encode(buf, data)
@@ -24,17 +24,18 @@ class SyncSkillsPayload(val skillData: Map<ResourceLocation, SkillData>) : Custo
                 val size = buf.readVarInt()
                 val map = HashMap<ResourceLocation, SkillData>()
 
-                for (i in 0..<size) {
-                    val id: ResourceLocation = buf.readResourceLocation()
-                    val data: SkillData = ByteBufCodecs.fromCodec(SkillData.CODEC).decode(buf)
+                for (ignored in 0 ..size) {
+                    val id = buf.readResourceLocation()
+                    val data = ByteBufCodecs.fromCodec(SkillData.CODEC).decode(buf)
 
                     map[id] = data
                 }
+
                 SyncSkillsPayload(map)
             }
         )
 
-        val TYPE = CustomPacketPayload.Type<SyncSkillsPayload>(ID)
+        val TYPE = CustomPacketPayload.Type<SyncSkillsPayload>(Koko.namespacePath("skills_payload"))
     }
 
     override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> = TYPE

@@ -2,11 +2,14 @@ package dev.koji.koko.common.models.effects.player
 
 import com.mojang.logging.LogUtils
 import com.mojang.serialization.Codec
+import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.events.PlayerEventHandler
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
+import dev.koji.koko.common.models.effects.Effects
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.player.Player
@@ -15,7 +18,7 @@ class ItemAttackSkillEffect(
     val item: String,
     val filter: AbstractSkillEffectFilter
 ) : AbstractSkillEffect() {
-    override val type: String = TYPE
+    override val type: String = Effects.PLAYER_ATTACK_USE
 
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? = filter.takeIf { it.apply(level) }
 
@@ -35,21 +38,17 @@ class ItemAttackSkillEffect(
     }
 
     companion object {
-        const val TYPE = "player/item_attack"
-
-        val CODEC = RecordCodecBuilder.mapCodec { instance ->
+        val CODEC: MapCodec<ItemAttackSkillEffect> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 Codec.STRING.fieldOf("item").forGetter(ItemAttackSkillEffect::item),
                 AbstractSkillEffectFilter.CODEC.fieldOf("filter").forGetter(ItemAttackSkillEffect::filter)
             ).apply(instance, ::ItemAttackSkillEffect)
         }
 
-        val STREAM_CODEC = StreamCodec.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, ItemAttackSkillEffect> = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, ItemAttackSkillEffect::item,
             AbstractSkillEffectFilter.STREAM_CODEC, ItemAttackSkillEffect::filter,
             ::ItemAttackSkillEffect
         )
-
-        private val LOGGER = LogUtils.getLogger()
     }
 }
