@@ -36,7 +36,17 @@ class AttributeSkillEffect(
         }
     }
 
-    override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
+    override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) =
+        this.handleAttribute(applier, player, true)
+
+    override fun unApply(applier: SkillsHandler.SkillEffectApplier, player: Player) =
+        this.handleAttribute(applier, player, false)
+
+    private fun handleAttribute(
+        applier: SkillsHandler.SkillEffectApplier,
+        player: Player,
+        add: Boolean
+    ) {
         val attributes = player.attributes
 
         val attributeLocation = SkillsHandler.safeParseResource(attribute)
@@ -66,16 +76,11 @@ class AttributeSkillEffect(
             else -> return Koko.LOGGER.warn("Couldn't identify modifier.")
         }
 
-        attributeInstance.addOrUpdateTransientModifier(modifier)
+        if (add)
+            attributeInstance.addOrUpdateTransientModifier(modifier)
+        else
+            attributeInstance.removeModifier(modifier)
     }
-
-    override fun unApply(
-        applier: SkillsHandler.SkillEffectApplier,
-        player: Player
-    ) {
-        TODO("Not yet implemented")
-    }
-
     companion object {
         val CODEC: MapCodec<AttributeSkillEffect> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
