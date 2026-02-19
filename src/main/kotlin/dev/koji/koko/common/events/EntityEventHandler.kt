@@ -3,8 +3,8 @@ package dev.koji.koko.common.events
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.models.sources.AbstractSkillSource
-import dev.koji.koko.common.models.sources.Sources
 import dev.koji.koko.common.models.sources.SkillSourceFilter
+import dev.koji.koko.common.models.sources.Sources
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey

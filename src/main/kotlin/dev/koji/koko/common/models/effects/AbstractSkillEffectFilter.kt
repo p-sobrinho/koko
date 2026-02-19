@@ -42,17 +42,17 @@ abstract class AbstractSkillEffectFilter {
             )
 
         val codecsMapper = mapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
-            AboveSkillEffectFilter.TYPE to AboveSkillEffectFilter.CODEC,
-            RangeSkillEffectFilter.TYPE to RangeSkillEffectFilter.CODEC,
-            BellowSkillEffectFilter.TYPE to BellowSkillEffectFilter.CODEC,
-            BlockedSkillEffectFilter.TYPE to BlockedSkillEffectFilter.CODEC
+            Filters.ABOVE to AboveSkillEffectFilter.CODEC,
+            Filters.RANGE to RangeSkillEffectFilter.CODEC,
+            Filters.BELLOW to BellowSkillEffectFilter.CODEC,
+            Filters.BLOCKED to BlockedSkillEffectFilter.CODEC
         )
 
         val streamCodecsMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
-            AboveSkillEffectFilter.TYPE to AboveSkillEffectFilter.STREAM_CODEC,
-            RangeSkillEffectFilter.TYPE to RangeSkillEffectFilter.STREAM_CODEC,
-            BellowSkillEffectFilter.TYPE to BellowSkillEffectFilter.STREAM_CODEC,
-            BlockedSkillEffectFilter.TYPE to BlockedSkillEffectFilter.STREAM_CODEC
+            Filters.ABOVE to AboveSkillEffectFilter.STREAM_CODEC,
+            Filters.RANGE to RangeSkillEffectFilter.STREAM_CODEC,
+            Filters.BELLOW to BellowSkillEffectFilter.STREAM_CODEC,
+            Filters.BLOCKED to BlockedSkillEffectFilter.STREAM_CODEC
         )
     }
 }

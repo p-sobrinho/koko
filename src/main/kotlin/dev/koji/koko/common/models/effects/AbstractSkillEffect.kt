@@ -42,21 +42,21 @@ abstract class AbstractSkillEffect {
             )
 
         private val codecMapper = mapOf<String, MapCodec<out AbstractSkillEffect>>(
-            AttributeSkillEffect.TYPE to AttributeSkillEffect.CODEC,
-            CraftingSkillEffect.TYPE to CraftingSkillEffect.CODEC,
-            ItemUseSkillEffect.TYPE to ItemUseSkillEffect.CODEC,
-            ItemConsumeSkillEffect.TYPE to ItemConsumeSkillEffect.CODEC,
-            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.CODEC,
-            ForgeSkillEffect.TYPE to ForgeSkillEffect.CODEC
+            Effects.PLAYER_ATTRIBUTE to AttributeSkillEffect.CODEC,
+            Effects.PLAYER_CRAFT to CraftingSkillEffect.CODEC,
+            Effects.PLAYER_FORGE to ForgeSkillEffect.CODEC,
+            Effects.PLAYER_ATTACK to ItemAttackSkillEffect.CODEC,
+            Effects.PLAYER_USE to ItemUseSkillEffect.CODEC,
+            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.CODEC
         )
 
         private val streamMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>>(
-            AttributeSkillEffect.TYPE to AttributeSkillEffect.STREAM_CODEC,
-            CraftingSkillEffect.TYPE to CraftingSkillEffect.STREAM_CODEC,
-            ItemUseSkillEffect.TYPE to ItemUseSkillEffect.STREAM_CODEC,
-            ItemConsumeSkillEffect.TYPE to ItemConsumeSkillEffect.STREAM_CODEC,
-            ItemAttackSkillEffect.TYPE to ItemAttackSkillEffect.STREAM_CODEC,
-            ForgeSkillEffect.TYPE to ForgeSkillEffect.STREAM_CODEC
+            Effects.PLAYER_ATTRIBUTE to AttributeSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_CRAFT to CraftingSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_FORGE to ForgeSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_ATTACK to ItemAttackSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_USE to ItemUseSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.STREAM_CODEC
         )
     }
 }

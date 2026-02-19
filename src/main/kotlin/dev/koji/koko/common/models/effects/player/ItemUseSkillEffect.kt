@@ -1,6 +1,5 @@
 package dev.koji.koko.common.models.effects.player
 
-import com.mojang.logging.LogUtils
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder

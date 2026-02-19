@@ -1,14 +1,12 @@
 package dev.koji.koko.common.events
 
 import dev.koji.koko.common.SkillsHandler
-import dev.koji.koko.common.events.EntityEventHandler.matchesEntity
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import dev.koji.koko.common.models.sources.Sources
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -16,10 +14,8 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.TagKey
 import net.minecraft.world.Container
-import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.event.AnvilUpdateEvent

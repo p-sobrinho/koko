@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.effects.Filters
-import io.netty.buffer.ByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec

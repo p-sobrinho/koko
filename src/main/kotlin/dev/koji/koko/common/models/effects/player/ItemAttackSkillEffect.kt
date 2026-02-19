@@ -1,6 +1,5 @@
 package dev.koji.koko.common.models.effects.player
 
-import com.mojang.logging.LogUtils
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
@@ -18,7 +17,7 @@ class ItemAttackSkillEffect(
     val item: String,
     val filter: AbstractSkillEffectFilter
 ) : AbstractSkillEffect() {
-    override val type: String = Effects.PLAYER_ATTACK_USE
+    override val type: String = Effects.PLAYER_ATTACK
 
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? = filter.takeIf { it.apply(level) }
 

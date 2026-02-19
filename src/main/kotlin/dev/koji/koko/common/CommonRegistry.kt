@@ -1,22 +1,14 @@
 package dev.koji.koko.common
 
-import com.mojang.brigadier.arguments.DoubleArgumentType
-import com.mojang.brigadier.arguments.StringArgumentType
-import com.mojang.brigadier.context.CommandContext
 import dev.koji.koko.Koko
 import dev.koji.koko.common.attachments.PlayerSkills
 import dev.koji.koko.common.models.SkillModel
-import net.minecraft.commands.CommandSourceStack
-import net.minecraft.commands.Commands
-import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.core.Registry
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.attachment.AttachmentType
-import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.registries.DataPackRegistryEvent
 import net.neoforged.neoforge.registries.DeferredHolder
 import net.neoforged.neoforge.registries.DeferredRegister

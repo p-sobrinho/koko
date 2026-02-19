@@ -2,7 +2,6 @@ package dev.koji.koko.common.network.payloads
 
 import dev.koji.koko.Koko
 import dev.koji.koko.common.models.SkillData
-import io.netty.buffer.ByteBuf
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
