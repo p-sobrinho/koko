@@ -7,4 +7,5 @@ object Effects {
     const val PLAYER_CONSUME = "player/item_consume"
     const val PLAYER_CRAFT = "player/craft"
     const val PLAYER_FORGE = "player/forge"
+    const val PLAYER_ARMOR = "player/armor"
 }

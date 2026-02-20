@@ -47,7 +47,8 @@ abstract class AbstractSkillEffect {
             Effects.PLAYER_FORGE to ForgeSkillEffect.CODEC,
             Effects.PLAYER_ATTACK to ItemAttackSkillEffect.CODEC,
             Effects.PLAYER_USE to ItemUseSkillEffect.CODEC,
-            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.CODEC
+            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.CODEC,
+            Effects.PLAYER_ARMOR to ArmorEquipSkillEffect.CODEC
         )
 
         private val streamMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>>(
@@ -56,7 +57,8 @@ abstract class AbstractSkillEffect {
             Effects.PLAYER_FORGE to ForgeSkillEffect.STREAM_CODEC,
             Effects.PLAYER_ATTACK to ItemAttackSkillEffect.STREAM_CODEC,
             Effects.PLAYER_USE to ItemUseSkillEffect.STREAM_CODEC,
-            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.STREAM_CODEC
+            Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.STREAM_CODEC,
+            Effects.PLAYER_ARMOR to ArmorEquipSkillEffect.STREAM_CODEC
         )
     }
 }

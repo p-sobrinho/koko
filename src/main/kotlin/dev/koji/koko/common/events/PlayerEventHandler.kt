@@ -14,6 +14,8 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.TagKey
 import net.minecraft.world.Container
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.neoforged.bus.api.SubscribeEvent
@@ -26,7 +28,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import net.neoforged.neoforge.event.tick.PlayerTickEvent
-import net.neoforged.neoforge.event.tick.ServerTickEvent
 import java.time.Instant
 import java.util.*
 
@@ -38,6 +39,7 @@ object PlayerEventHandler {
     private val BLOCKED_PLAYER_ATTACKABLES = HashMap<UUID, MutableSet<ResourceLocation>>()
     private val BLOCKED_PLAYER_CRAFTABLE = HashMap<UUID, MutableSet<ResourceLocation>>()
     private val BLOCKED_PLAYER_FORGE = HashMap<UUID, MutableSet<ResourceLocation>>()
+    private val BLOCKED_PLAYER_ARMOR = HashMap<UUID, MutableSet<ResourceLocation>>()
 
     private val MESSAGES_COOLDOWNS = HashMap<EventMessage, Instant>()
 
@@ -56,6 +58,8 @@ object PlayerEventHandler {
         val level = player.level()
 
         if (level.isClientSide) return
+
+        this.checkPlayerArmor(player)
 
         if (level.gameTime % 20 != 0L) return
 
@@ -165,6 +169,23 @@ object PlayerEventHandler {
         this.triggerMessage(player, EventMessage.UNABLE_TO_FORGE)
     }
 
+    fun checkPlayerArmor(player: Player) {
+        val playerInventory = player.inventory
+
+        for (i in 36..39) {
+            val armor = playerInventory.getItem(i)
+
+            if (!this.isItemBlockedFor(player, armor, BlockScope.ARMOR)) continue
+
+            player.addEffect(MobEffectInstance(
+                MobEffects.MOVEMENT_SLOWDOWN,
+                20, 3
+            ))
+
+            this.triggerMessage(player, EventMessage.UNABLE_TO_ARMOR)
+        }
+    }
+
     fun processPlayerEvaluate(
         source: String,
         item: ItemStack,
@@ -211,32 +232,35 @@ object PlayerEventHandler {
     }
 
     fun addBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
-        when(scope) {
+        when (scope) {
             BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }.add(item)
             BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }.add(item)
             BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }.add(item)
             BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }.add(item)
             BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }.add(item)
+            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }.add(item)
         }
     }
 
     fun removeBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
-        when(scope) {
+        when (scope) {
             BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }.remove(item)
             BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }.remove(item)
             BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }.remove(item)
             BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }.remove(item)
             BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }.remove(item)
+            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }.remove(item)
         }
     }
 
     fun clearBlockedItemsFor(uuid: UUID, scope: BlockScope) {
-        when(scope) {
+        when (scope) {
             BlockScope.USE -> BLOCKED_PLAYER_USES[uuid]?.clear()
             BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES[uuid]?.clear()
             BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES[uuid]?.clear()
             BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE[uuid]?.clear()
             BlockScope.FORGE -> BLOCKED_PLAYER_FORGE[uuid]?.clear()
+            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR[uuid]?.clear()
         }
     }
 
@@ -259,6 +283,7 @@ object PlayerEventHandler {
             EventMessage.UNABLE_TO_CONSUME -> "§cYou don't know how to properly consume this item..."
             EventMessage.UNABLE_TO_CRAFT -> "§cYou have no idea what to do with these items..."
             EventMessage.UNABLE_TO_FORGE -> "§cYou don't know how to enchant this item..."
+            EventMessage.UNABLE_TO_ARMOR -> "§cYou feel to weak to support this armor..."
         }
 
         MESSAGES_COOLDOWNS[eventMessage] = Instant.now().plusSeconds(1)
@@ -290,11 +315,12 @@ object PlayerEventHandler {
 
     fun getBlockedItems(uuid: UUID, scope: BlockScope): Set<ResourceLocation> {
         val blockedItems = when(scope) {
-            BlockScope.USE -> BLOCKED_PLAYER_USES.getOrElse(uuid) { mutableSetOf() }
-            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrElse(uuid) { mutableSetOf() }
-            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrElse(uuid) { mutableSetOf() }
-            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrElse(uuid) { mutableSetOf() }
-            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrElse(uuid) { mutableSetOf() }
+            BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }
+            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }
+            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }
+            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }
+            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }
+            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }
         }
 
         return blockedItems
@@ -344,7 +370,7 @@ object PlayerEventHandler {
     }
 
     enum class EventMessage {
-        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE
+        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR
     }
-    enum class BlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE }
+    enum class BlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR }
 }
