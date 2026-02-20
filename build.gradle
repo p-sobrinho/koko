@@ -11,10 +11,16 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+
     maven {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
         content { includeGroup "thedarkcolour" }
+    }
+
+    maven {
+        name = "Curios"
+        url = uri("https://maven.theillusivec4.top/")
     }
 }
 
@@ -68,7 +74,8 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    implementation 'thedarkcolour:kotlinforforge-neoforge:5.9.0'
+    implementation "thedarkcolour:kotlinforforge-neoforge:${kotlin_for_forge_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_api_version}+${minecraft_version}:api"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
