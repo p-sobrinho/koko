@@ -1,4 +1,4 @@
-package dev.koji.koko.common.compact.curios
+package dev.koji.koko.common.compact.ironspells
 
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.curios.effects.CuriosEquipSkillEffect
@@ -18,8 +18,9 @@ import net.neoforged.neoforge.common.util.TriState
 import net.neoforged.neoforge.event.tick.PlayerTickEvent
 import top.theillusivec4.curios.api.CuriosApi
 import top.theillusivec4.curios.api.event.CurioCanEquipEvent
+import kotlin.collections.set
 
-class Curios {
+class IronSpellsCompact {
     @SubscribeEvent
     fun onPlayerTick(event: PlayerTickEvent.Post) {
         val player = event.entity
@@ -110,10 +111,18 @@ class Curios {
     }
 
     fun register() {
-        AbstractSkillSource.codecsMapper[CuriosSources.PLAYER_CURIOUS_USE] = CuriosTickSource.CODEC
-        AbstractSkillSource.streamMapper[CuriosSources.PLAYER_CURIOUS_USE] = CuriosTickSource.STREAM_CODEC
+        AbstractSkillSource.codecsMapper[Sources.PLAYER_CURIOUS_USE] = CuriosTickSource.CODEC
+        AbstractSkillSource.streamMapper[Sources.PLAYER_CURIOUS_USE] = CuriosTickSource.STREAM_CODEC
 
-        AbstractSkillEffect.codecMapper[CuriosEffects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.CODEC
-        AbstractSkillEffect.streamMapper[CuriosEffects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.STREAM_CODEC
+        AbstractSkillEffect.codecMapper[Effects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.CODEC
+        AbstractSkillEffect.streamMapper[Effects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.STREAM_CODEC
+    }
+
+    object Sources {
+        const val PLAYER_CURIOUS_USE = "player/curios_use"
+    }
+
+    object Effects {
+        const val PLAYER_CURIOS_EQUIP = "player/curios_equip"
     }
 }
