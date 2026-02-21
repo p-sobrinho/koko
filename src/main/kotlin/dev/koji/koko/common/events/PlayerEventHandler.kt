@@ -31,7 +31,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent
 import java.time.Instant
 import java.util.*
 
-
 @EventBusSubscriber
 object PlayerEventHandler {
     private val BLOCKED_PLAYER_INSTANCES = mutableSetOf<BlockedPlayerInstance>()

@@ -5,13 +5,10 @@ import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.curios.CuriosEffects
-import dev.koji.koko.common.compact.curios.CuriosSources
 import dev.koji.koko.common.events.PlayerEventHandler
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
-import dev.koji.koko.common.models.effects.Effects
 import dev.koji.koko.common.models.effects.filters.BlockedSkillEffectFilter
-import dev.koji.koko.common.models.effects.player.ArmorEquipSkillEffect
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
