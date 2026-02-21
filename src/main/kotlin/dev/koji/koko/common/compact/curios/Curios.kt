@@ -9,6 +9,8 @@ import dev.koji.koko.common.events.PlayerEventHandler.EventMessage
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.neoforged.bus.api.SubscribeEvent
@@ -17,9 +19,9 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent
 import top.theillusivec4.curios.api.CuriosApi
 import top.theillusivec4.curios.api.event.CurioCanEquipEvent
 
-object Curios {
+class Curios {
     @SubscribeEvent
-    fun onPlayerTick(event: PlayerTickEvent) {
+    fun onPlayerTick(event: PlayerTickEvent.Post) {
         val player = event.entity
 
         if (player.level().isClientSide) return
@@ -36,7 +38,16 @@ object Curios {
 
             if (curioAt == ItemStack.EMPTY) continue
 
-            this.processCuriosEvaluate(CuriosSources.PLAYER_CURIOUS_USE, curioAt, player)
+            if (!PlayerEventHandler.isItemBlockedFor(player, curioAt, BlockScope.CURIOS)) continue
+
+            player.addEffect(MobEffectInstance(
+                MobEffects.MOVEMENT_SLOWDOWN,
+                20, 10
+            ))
+
+            PlayerEventHandler.triggerMessage(player, EventMessage.UNABLE_TO_CURIOS)
+
+            break
         }
     }
 

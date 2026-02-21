@@ -77,7 +77,7 @@ class AttributeSkillEffect(
                 Koko.namespacePath("attribute_${attributeLocation.path}"), filter.value, filter.operation
             )
 
-            else -> return Koko.LOGGER.warn("Couldn't identify modifier.")
+            else -> return Koko.LOGGER.warn("Filter ${filter::class.simpleName} is not supported.")
         }
 
         if (add)

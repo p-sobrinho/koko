@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.compact.curios.CuriosEffects
 import dev.koji.koko.common.compact.curios.CuriosSources
 import dev.koji.koko.common.events.PlayerEventHandler
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
@@ -20,7 +21,7 @@ class CuriosEquipSkillEffect(
     val curio: String,
     val filter: AbstractSkillEffectFilter
 ) : AbstractSkillEffect() {
-    override val type: String = CuriosSources.PLAYER_CURIOUS_USE
+    override val type: String = CuriosEffects.PLAYER_CURIOS_EQUIP
 
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? {
         if (filter !is BlockedSkillEffectFilter)

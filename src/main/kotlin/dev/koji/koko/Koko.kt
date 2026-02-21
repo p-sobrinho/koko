@@ -23,7 +23,7 @@ class Koko {
         LOGGER.info("Koko is loading...")
 
         CommonRegistry.register(modEventBus)
-        Compatibilities.register(modEventBus)
+        Compatibilities.register()
 
         LOGGER.info("Koko has been successfully loaded.")
     }

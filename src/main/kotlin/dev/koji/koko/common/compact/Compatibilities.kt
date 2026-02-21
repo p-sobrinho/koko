@@ -6,13 +6,15 @@ import net.neoforged.fml.ModList
 import net.neoforged.neoforge.common.NeoForge
 
 object Compatibilities {
-    fun register(eventBus: IEventBus) {
+    fun register() {
         val modList = ModList.get()
 
         if (modList.isLoaded("curios")) {
-            Curios.register()
+            val curiosCompact = Curios()
 
-            //NeoForge.EVENT_BUS.register(Curios::class)
+            curiosCompact.register()
+
+            NeoForge.EVENT_BUS.register(curiosCompact)
         }
     }
 }

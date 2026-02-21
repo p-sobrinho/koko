@@ -52,11 +52,9 @@ object PlayerEventHandler {
         val player = event.entity
         val level = player.level()
 
-        if (level.isClientSide) return
+        if (level.isClientSide || level.gameTime % 20 != 0L) return
 
         this.checkPlayerArmor(player)
-
-        if (level.gameTime % 20 != 0L) return
 
         SkillsHandler.syncEffects(player)
     }
@@ -173,15 +171,7 @@ object PlayerEventHandler {
     fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: BlockScope): Boolean {
         val blockedRecipes = this.getBlockedItemsInScope(uuid, scope)
 
-        val isBlocked = blockedRecipes.find {
-            if (item.`is`(TagKey.create(Registries.ITEM, it.location))) return@find true
-
-            val keyOptional = item.itemHolder.unwrapKey()
-
-            if (keyOptional.isEmpty) return false
-
-            return@find keyOptional.get().location() == it
-        }
+        val isBlocked = blockedRecipes.find { this.itemMatches(item, it.location) }
 
         return (isBlocked != null)
     }
@@ -199,7 +189,9 @@ object PlayerEventHandler {
         this.getBlockedPlayerInstance(player.uuid)
 
     fun getBlockedPlayerInstance(uuid: UUID): BlockedPlayerInstance {
-        var foundInstance = BLOCKED_PLAYER_INSTANCES.find { it.uuid == uuid }
+        var foundInstance = BLOCKED_PLAYER_INSTANCES.find {
+            it.uuid == uuid
+        }
 
         if (foundInstance == null) {
             foundInstance = BlockedPlayerInstance(uuid, mutableSetOf())
@@ -321,9 +313,9 @@ object PlayerEventHandler {
         player.sendSystemMessage(Component.literal(message))
     }
 
-    fun itemMatches(item: ItemStack, targetLocation: String): Boolean {
-        val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
-
+    fun itemMatches(item: ItemStack, targetLocation: String): Boolean =
+        this.itemMatches(item, SkillsHandler.safeParseResource(targetLocation))
+    fun itemMatches(item: ItemStack, resourceLocation: ResourceLocation): Boolean {
         if (item.`is`(TagKey.create(Registries.ITEM, resourceLocation))) return true
 
         val keyOptional = item.itemHolder.unwrapKey()
@@ -365,7 +357,8 @@ object PlayerEventHandler {
     }
 
     enum class EventMessage {
-        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR,
+        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME,
+        UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR,
         UNABLE_TO_CURIOS
     }
 
