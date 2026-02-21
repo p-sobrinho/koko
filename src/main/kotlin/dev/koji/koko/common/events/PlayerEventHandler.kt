@@ -34,12 +34,7 @@ import java.util.*
 
 @EventBusSubscriber
 object PlayerEventHandler {
-    private val BLOCKED_PLAYER_USES = HashMap<UUID, MutableSet<ResourceLocation>>()
-    private val BLOCKED_PLAYER_CONSUMABLES = HashMap<UUID, MutableSet<ResourceLocation>>()
-    private val BLOCKED_PLAYER_ATTACKABLES = HashMap<UUID, MutableSet<ResourceLocation>>()
-    private val BLOCKED_PLAYER_CRAFTABLE = HashMap<UUID, MutableSet<ResourceLocation>>()
-    private val BLOCKED_PLAYER_FORGE = HashMap<UUID, MutableSet<ResourceLocation>>()
-    private val BLOCKED_PLAYER_ARMOR = HashMap<UUID, MutableSet<ResourceLocation>>()
+    private val BLOCKED_PLAYER_INSTANCES = mutableSetOf<BlockedPlayerInstance>()
 
     private val MESSAGES_COOLDOWNS = HashMap<EventMessage, Instant>()
 
@@ -169,6 +164,52 @@ object PlayerEventHandler {
         this.triggerMessage(player, EventMessage.UNABLE_TO_FORGE)
     }
 
+    fun isItemBlockedFor(player: Player, item: ItemStack, scope: BlockScope): Boolean {
+        if (item.isEmpty) return false
+
+        return this.isItemBlockedFor(player.uuid, item, scope)
+    }
+
+    fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: BlockScope): Boolean {
+        val blockedRecipes = this.getBlockedItemsInScope(uuid, scope)
+
+        val isBlocked = blockedRecipes.find {
+            if (item.`is`(TagKey.create(Registries.ITEM, it.location))) return@find true
+
+            val keyOptional = item.itemHolder.unwrapKey()
+
+            if (keyOptional.isEmpty) return false
+
+            return@find keyOptional.get().location() == it
+        }
+
+        return (isBlocked != null)
+    }
+
+    fun getBlockedItemsInScope(uuid: UUID, scope: BlockScope): Set<BlockedItem> {
+        val blockedItems = BLOCKED_PLAYER_INSTANCES.find { it.uuid == uuid }
+            ?.blockedItems
+            ?.filter { it.scopes.contains(scope) }
+            ?.toSet()
+
+        return blockedItems ?: emptySet()
+    }
+
+    fun getBlockedPlayerInstance(player: Player) =
+        this.getBlockedPlayerInstance(player.uuid)
+
+    fun getBlockedPlayerInstance(uuid: UUID): BlockedPlayerInstance {
+        var foundInstance = BLOCKED_PLAYER_INSTANCES.find { it.uuid == uuid }
+
+        if (foundInstance == null) {
+            foundInstance = BlockedPlayerInstance(uuid, mutableSetOf())
+
+            BLOCKED_PLAYER_INSTANCES.add(foundInstance)
+        }
+
+        return foundInstance
+    }
+
     fun checkPlayerArmor(player: Player) {
         val playerInventory = player.inventory
 
@@ -189,7 +230,7 @@ object PlayerEventHandler {
     fun processPlayerEvaluate(
         source: String,
         item: ItemStack,
-        player: ServerPlayer
+        player: Player
     ) {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
@@ -232,45 +273,33 @@ object PlayerEventHandler {
     }
 
     fun addBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
-        when (scope) {
-            BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }.add(item)
-            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }.add(item)
-            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }.add(item)
-            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }.add(item)
-            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }.add(item)
-            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }.add(item)
+        val blockedItems = this.getBlockedPlayerInstance(uuid).blockedItems
+        var blockedItem = blockedItems.find { it.location == item }
+
+        if (blockedItem == null) {
+            blockedItem = BlockedItem(item, mutableSetOf())
+
+            blockedItems.add(blockedItem)
         }
+
+        blockedItem.scopes.add(scope)
     }
 
     fun removeBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
-        when (scope) {
-            BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }.remove(item)
-            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }.remove(item)
-            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }.remove(item)
-            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }.remove(item)
-            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }.remove(item)
-            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }.remove(item)
-        }
+        val blockedItem = this.getBlockedPlayerInstance(uuid).blockedItems.find { it.location == item }
+
+        if (blockedItem == null) return
+
+        blockedItem.scopes.removeIf { it == scope }
     }
 
     fun clearBlockedItemsFor(uuid: UUID, scope: BlockScope) {
-        when (scope) {
-            BlockScope.USE -> BLOCKED_PLAYER_USES[uuid]?.clear()
-            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES[uuid]?.clear()
-            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES[uuid]?.clear()
-            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE[uuid]?.clear()
-            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE[uuid]?.clear()
-            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR[uuid]?.clear()
+        for (blockedItem in this.getBlockedPlayerInstance(uuid).blockedItems) {
+            blockedItem.scopes.removeIf { it == scope }
         }
     }
 
-    fun clearAllBlockedItemsFor(uuid: UUID) {
-        BLOCKED_PLAYER_USES[uuid]?.clear()
-        BLOCKED_PLAYER_ATTACKABLES[uuid]?.clear()
-        BLOCKED_PLAYER_CONSUMABLES[uuid]?.clear()
-        BLOCKED_PLAYER_CRAFTABLE[uuid]?.clear()
-        BLOCKED_PLAYER_FORGE[uuid]?.clear()
-    }
+    fun clearAllBlockedItemsFor(uuid: UUID) = this.getBlockedPlayerInstance(uuid).blockedItems.clear()
 
     fun triggerMessage(player: Player, eventMessage: EventMessage) {
         val cooldown = MESSAGES_COOLDOWNS.get(eventMessage)
@@ -284,6 +313,7 @@ object PlayerEventHandler {
             EventMessage.UNABLE_TO_CRAFT -> "§cYou have no idea what to do with these items..."
             EventMessage.UNABLE_TO_FORGE -> "§cYou don't know how to enchant this item..."
             EventMessage.UNABLE_TO_ARMOR -> "§cYou feel to weak to support this armor..."
+            EventMessage.UNABLE_TO_CURIOS -> "§cYou aren't worth of using this curio..."
         }
 
         MESSAGES_COOLDOWNS[eventMessage] = Instant.now().plusSeconds(1)
@@ -291,48 +321,7 @@ object PlayerEventHandler {
         player.sendSystemMessage(Component.literal(message))
     }
 
-    fun isItemBlockedFor(player: Player, item: ItemStack, scope: BlockScope): Boolean {
-        if (item.isEmpty) return false
-
-        return this.isItemBlockedFor(player.uuid, item, scope)
-    }
-
-    fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: BlockScope): Boolean {
-        val blockedRecipes = this.getBlockedItems(uuid, scope)
-
-        val isBlocked = blockedRecipes.find {
-            if (item.`is`(TagKey.create(Registries.ITEM, it))) return@find true
-
-            val keyOptional = item.itemHolder.unwrapKey()
-
-            if (keyOptional.isEmpty) return false
-
-            return@find keyOptional.get().location() == it
-        }
-
-        return (isBlocked != null)
-    }
-
-    fun getBlockedItems(uuid: UUID, scope: BlockScope): Set<ResourceLocation> {
-        val blockedItems = when(scope) {
-            BlockScope.USE -> BLOCKED_PLAYER_USES.getOrPut(uuid) { mutableSetOf() }
-            BlockScope.ATTACK -> BLOCKED_PLAYER_ATTACKABLES.getOrPut(uuid) { mutableSetOf() }
-            BlockScope.CONSUME -> BLOCKED_PLAYER_CONSUMABLES.getOrPut(uuid) { mutableSetOf() }
-            BlockScope.CRAFT -> BLOCKED_PLAYER_CRAFTABLE.getOrPut(uuid) { mutableSetOf() }
-            BlockScope.FORGE -> BLOCKED_PLAYER_FORGE.getOrPut(uuid) { mutableSetOf() }
-            BlockScope.ARMOR -> BLOCKED_PLAYER_ARMOR.getOrPut(uuid) { mutableSetOf() }
-        }
-
-        return blockedItems
-    }
-
-    private fun doPlayerStuff(player: Player) {
-        SkillsHandler.syncNewSkills(player)
-        SkillsHandler.syncPlayerSkills(player)
-        SkillsHandler.syncEffects(player)
-    }
-
-    private fun itemMatches(item: ItemStack, targetLocation: String): Boolean {
+    fun itemMatches(item: ItemStack, targetLocation: String): Boolean {
         val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
 
         if (item.`is`(TagKey.create(Registries.ITEM, resourceLocation))) return true
@@ -342,6 +331,12 @@ object PlayerEventHandler {
         if (keyOptional.isEmpty) return false
 
         return keyOptional.get().location() == resourceLocation
+    }
+
+    private fun doPlayerStuff(player: Player) {
+        SkillsHandler.syncNewSkills(player)
+        SkillsHandler.syncPlayerSkills(player)
+        SkillsHandler.syncEffects(player)
     }
 
     private fun returnIngredients(inventory: Container, player: Player) {
@@ -370,7 +365,24 @@ object PlayerEventHandler {
     }
 
     enum class EventMessage {
-        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR
+        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME, UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR,
+        UNABLE_TO_CURIOS
     }
-    enum class BlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR }
+
+    enum class BlockScope {
+        USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR, CURIOS, ISPELL
+    }
+
+    data class BlockedPlayerInstance(
+        val uuid: UUID,
+        val blockedItems: MutableSet<BlockedItem>,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return other is BlockedPlayerInstance && other.uuid == this.uuid
+        }
+
+        override fun hashCode(): Int = uuid.hashCode()
+    }
+
+    data class BlockedItem(val location: ResourceLocation, val scopes: MutableSet<BlockScope>)
 }

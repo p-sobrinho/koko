@@ -30,21 +30,21 @@ abstract class AbstractSkillSource {
                     val type = source.type
                     ByteBufCodecs.STRING_UTF8.encode(buf, type)
 
-                    val streamCodec = streamCodecsMapper[type]
+                    val streamCodec = streamMapper[type]
                         ?: throw IllegalArgumentException("$type is not supported")
 
                     (streamCodec as StreamCodec<RegistryFriendlyByteBuf, AbstractSkillSource>).encode(buf, source)
                 },
                 { buf ->
                     val type = ByteBufCodecs.STRING_UTF8.decode(buf)
-                    val codec = streamCodecsMapper[type]
+                    val codec = streamMapper[type]
                         ?: throw IllegalArgumentException("Illegal source type: $type")
 
                     codec.decode(buf)
                 }
             )
 
-        val codecsMapper = mapOf<String, MapCodec<out AbstractSkillSource>>(
+        val codecsMapper = mutableMapOf<String, MapCodec<out AbstractSkillSource>>(
             Sources.BLOCK_PLACE to BlockPlaceSource.CODEC,
             Sources.BLOCK_INTERACT to BlockBreakSource.CODEC,
             Sources.BLOCK_BREAK to BlockInteractSource.CODEC,
@@ -60,7 +60,7 @@ abstract class AbstractSkillSource {
             Sources.PLAYER_DIED to PlayerDiedSource.CODEC
         )
 
-        val streamCodecsMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillSource>>(
+        val streamMapper = mutableMapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillSource>>(
             Sources.BLOCK_PLACE to BlockPlaceSource.STREAM_CODEC,
             Sources.BLOCK_INTERACT to BlockBreakSource.STREAM_CODEC,
             Sources.BLOCK_BREAK to BlockInteractSource.STREAM_CODEC,

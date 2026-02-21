@@ -32,3 +32,15 @@ license = "${mod_license}"
     versionRange = "${loader_version_range}"
     ordering = "AFTER"
     side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+    modId = "curios"
+    type = "optional"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+    modId = "irons_spellbooks"
+    type = "optional"
+    ordering = "AFTER"
+    side = "BOTH"

@@ -41,14 +41,14 @@ abstract class AbstractSkillEffectFilter {
                 }
             )
 
-        val codecsMapper = mapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
+        val codecsMapper = mutableMapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
             Filters.ABOVE to AboveSkillEffectFilter.CODEC,
             Filters.RANGE to RangeSkillEffectFilter.CODEC,
             Filters.BELLOW to BellowSkillEffectFilter.CODEC,
             Filters.BLOCKED to BlockedSkillEffectFilter.CODEC
         )
 
-        val streamCodecsMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
+        val streamCodecsMapper = mutableMapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
             Filters.ABOVE to AboveSkillEffectFilter.STREAM_CODEC,
             Filters.RANGE to RangeSkillEffectFilter.STREAM_CODEC,
             Filters.BELLOW to BellowSkillEffectFilter.STREAM_CODEC,

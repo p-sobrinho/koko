@@ -41,7 +41,7 @@ abstract class AbstractSkillEffect {
                 }
             )
 
-        private val codecMapper = mapOf<String, MapCodec<out AbstractSkillEffect>>(
+        val codecMapper = mutableMapOf<String, MapCodec<out AbstractSkillEffect>>(
             Effects.PLAYER_ATTRIBUTE to AttributeSkillEffect.CODEC,
             Effects.PLAYER_CRAFT to CraftingSkillEffect.CODEC,
             Effects.PLAYER_FORGE to ForgeSkillEffect.CODEC,
@@ -51,7 +51,7 @@ abstract class AbstractSkillEffect {
             Effects.PLAYER_ARMOR to ArmorEquipSkillEffect.CODEC
         )
 
-        private val streamMapper = mapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>>(
+        val streamMapper = mutableMapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>>(
             Effects.PLAYER_ATTRIBUTE to AttributeSkillEffect.STREAM_CODEC,
             Effects.PLAYER_CRAFT to CraftingSkillEffect.STREAM_CODEC,
             Effects.PLAYER_FORGE to ForgeSkillEffect.STREAM_CODEC,
