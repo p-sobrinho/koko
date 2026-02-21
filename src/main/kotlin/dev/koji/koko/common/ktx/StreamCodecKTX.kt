@@ -3,7 +3,7 @@ package dev.koji.koko.common.ktx
 import net.minecraft.network.codec.StreamCodec
 
 object StreamCodecKTX {
-    fun <B, C, T1, T2, T3, T4, T5, T6, T7, T8, T9> composite(
+    fun <B, C, T1, T2, T3, T4, T5, T6, T7, T8> composite(
         streamCodec1: StreamCodec<in B, T1>, method1: (C) -> T1,
         streamCodec2: StreamCodec<in B, T2>, method2: (C) -> T2,
         streamCodec3: StreamCodec<in B, T3>, method3: (C) -> T3,
@@ -12,8 +12,7 @@ object StreamCodecKTX {
         streamCoded6: StreamCodec<in B, T6>, method6: (C) -> T6,
         streamCoded7: StreamCodec<in B, T7>, method7: (C) -> T7,
         streamCoded8: StreamCodec<in B, T8>, method8: (C) -> T8,
-        streamCoded9: StreamCodec<in B, T9>, method9: (C) -> T9,
-        constructor: (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> C
+        constructor: (T1, T2, T3, T4, T5, T6, T7, T8) -> C
     ): StreamCodec<B, C> {
         return object : StreamCodec<B, C> {
             @Suppress("WRONG_NULLABILITY_FOR_JAVA_OVERRIDE", "JAVA_TYPE_MISMATCH")
@@ -26,7 +25,6 @@ object StreamCodecKTX {
                 streamCoded6.encode(bufferObject, method6(encodeObject))
                 streamCoded7.encode(bufferObject, method7(encodeObject))
                 streamCoded8.encode(bufferObject, method8(encodeObject))
-                streamCoded9.encode(bufferObject, method9(encodeObject))
             }
 
             @Suppress("WRONG_NULLABILITY_FOR_JAVA_OVERRIDE", "JAVA_TYPE_MISMATCH")
@@ -39,9 +37,8 @@ object StreamCodecKTX {
                 val t6 = streamCoded6.decode(decodeObject)
                 val t7 = streamCoded7.decode(decodeObject)
                 val t8 = streamCoded8.decode(decodeObject)
-                val t9 = streamCoded9.decode(decodeObject)
 
-                return constructor(t1, t2, t3, t4, t5, t6, t7, t8, t9)
+                return constructor(t1, t2, t3, t4, t5, t6, t7, t8)
             }
         }
     }

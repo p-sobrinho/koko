@@ -7,18 +7,18 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import org.jetbrains.annotations.ApiStatus
 
-class SkillData(@set:ApiStatus.Internal var xp: Double, @set:ApiStatus.Internal var isOverClocked: Boolean) {
+class SkillData(@set:ApiStatus.Internal var xp: Double, @set:ApiStatus.Internal var isUnlocked: Boolean) {
     companion object {
         val CODEC: Codec<SkillData> = RecordCodecBuilder.create { instance ->
             instance.group(
                 Codec.DOUBLE.fieldOf("xp").forGetter(SkillData::xp),
-                Codec.BOOL.fieldOf("overclocked").forGetter(SkillData::isOverClocked)
+                Codec.BOOL.fieldOf("unlocked").forGetter(SkillData::isUnlocked)
             ).apply(instance, ::SkillData)
         }
 
         val STREAM_CODEC: StreamCodec<ByteBuf, SkillData> = StreamCodec.composite(
             ByteBufCodecs.DOUBLE, SkillData::xp,
-            ByteBufCodecs.BOOL, SkillData::isOverClocked,
+            ByteBufCodecs.BOOL, SkillData::isUnlocked,
             ::SkillData
         )
     }

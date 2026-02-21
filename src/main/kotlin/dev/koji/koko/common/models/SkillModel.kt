@@ -11,8 +11,7 @@ import net.minecraft.network.codec.StreamCodec
 
 data class SkillModel(
     val displayName: String, val icon: String, val description: String,
-    val minLevel: Int, val defaultXp: Double,
-    val maxLevel: Int, val overClockedMaxLevel: Int,
+    val defaultXp: Double, val maxLevel: Int, val unlockedMaxLevel: Int,
     val skillSources: List<AbstractSkillSource>, val effects: List<AbstractSkillEffect>
 ) {
     companion object {
@@ -21,10 +20,9 @@ data class SkillModel(
                 Codec.STRING.fieldOf("display_name").forGetter(SkillModel::displayName),
                 Codec.STRING.fieldOf("icon").forGetter(SkillModel::icon),
                 Codec.STRING.fieldOf("description").forGetter(SkillModel::description),
-                Codec.INT.fieldOf("min_level").forGetter(SkillModel::minLevel),
                 Codec.DOUBLE.fieldOf("default_xp").forGetter(SkillModel::defaultXp),
                 Codec.INT.fieldOf("max_level").forGetter(SkillModel::maxLevel),
-                Codec.INT.fieldOf("overclocked_max_level").forGetter(SkillModel::overClockedMaxLevel),
+                Codec.INT.fieldOf("unlocked_max_level").forGetter(SkillModel::unlockedMaxLevel),
                 AbstractSkillSource.CODEC.listOf().optionalFieldOf("sources", listOf()).forGetter(SkillModel::skillSources),
                 AbstractSkillEffect.CODEC.listOf().optionalFieldOf("effects", listOf()).forGetter(SkillModel::effects)
             ).apply(instance, ::SkillModel)
@@ -34,10 +32,9 @@ data class SkillModel(
             ByteBufCodecs.STRING_UTF8, SkillModel::displayName,
             ByteBufCodecs.STRING_UTF8, SkillModel::icon,
             ByteBufCodecs.STRING_UTF8, SkillModel::description,
-            ByteBufCodecs.VAR_INT, SkillModel::minLevel,
             ByteBufCodecs.DOUBLE, SkillModel::defaultXp,
             ByteBufCodecs.VAR_INT, SkillModel::maxLevel,
-            ByteBufCodecs.VAR_INT, SkillModel::overClockedMaxLevel,
+            ByteBufCodecs.VAR_INT, SkillModel::unlockedMaxLevel,
             AbstractSkillSource.STREAM_CODEC.apply(ByteBufCodecs.list()), SkillModel::skillSources,
             AbstractSkillEffect.STREAM_CODEC.apply(ByteBufCodecs.list()), SkillModel::effects,
             ::SkillModel

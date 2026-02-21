@@ -107,7 +107,7 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
 
                     val currentLevel = SkillsHandler.getLevel(player, slot.skillLocation)
                     val maxLevel =
-                        if (slot.skillData.isOverClocked) skillModel.overClockedMaxLevel else skillModel.maxLevel
+                        if (slot.skillData.isUnlocked) skillModel.unlockedMaxLevel else skillModel.maxLevel
 
                     set(DataComponents.LORE, ItemLore(listOf(
                         Component.translatable(skillModel.description).withStyle(ChatFormatting.WHITE),
