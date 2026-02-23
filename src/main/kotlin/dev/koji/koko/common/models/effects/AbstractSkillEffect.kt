@@ -60,5 +60,11 @@ abstract class AbstractSkillEffect {
             Effects.PLAYER_CONSUME to ItemConsumeSkillEffect.STREAM_CODEC,
             Effects.PLAYER_ARMOR to ArmorEquipSkillEffect.STREAM_CODEC
         )
+
+        fun registerCodec(path: String, codec: MapCodec<out AbstractSkillEffect>) { codecMapper[path] = codec }
+
+        fun registerStream(path: String, streamCodec: StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffect>) {
+            streamMapper[path] = streamCodec
+        }
     }
 }

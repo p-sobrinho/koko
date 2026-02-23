@@ -22,7 +22,7 @@ class BlockedSkillEffectFilter(val until: Int): AbstractSkillEffectFilter() {
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, BlockedSkillEffectFilter> = StreamCodec.composite(
-            ByteBufCodecs.INT, BlockedSkillEffectFilter::until,
+            ByteBufCodecs.VAR_INT, BlockedSkillEffectFilter::until,
             ::BlockedSkillEffectFilter
         )
     }

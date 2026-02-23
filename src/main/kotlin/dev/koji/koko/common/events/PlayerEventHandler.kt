@@ -364,11 +364,11 @@ object PlayerEventHandler {
     enum class PlayerBlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR, CURIOS, ISPELL }
 
     object DefaultPlayerMessages {
-        const val UNABLE_TO_USE = "&cYou don't know how to use this item."
-        const val UNABLE_TO_ATTACK = "&cYou feel too weak to wield this weapon."
-        const val UNABLE_TO_CONSUME = "&cYou don't know how to properly consume this item."
-        const val UNABLE_TO_CRAFT = "&cYou have no idea what to do with these items."
-        const val UNABLE_TO_FORGE = "&cYou don't know how to enchant this item."
-        const val UNABLE_TO_ARMOR = "&cYou feel to weak to support this armor."
+        const val UNABLE_TO_USE = "§cYou don't know how to use this item."
+        const val UNABLE_TO_ATTACK = "§cYou feel too weak to wield this weapon."
+        const val UNABLE_TO_CONSUME = "§cYou don't know how to properly consume this item."
+        const val UNABLE_TO_CRAFT = "§cYou have no idea what to do with these items."
+        const val UNABLE_TO_FORGE = "§cYou don't know how to enchant this item."
+        const val UNABLE_TO_ARMOR = "§cYou feel to weak to support this armor."
     }
 }

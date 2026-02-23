@@ -23,7 +23,7 @@ abstract class AbstractSkillSource {
     companion object {
         val CODEC: Codec<AbstractSkillSource> = Codec.STRING.dispatch(
             { source -> source.type },
-            { type -> codecsMapper.getOrElse(type) { throw IllegalArgumentException("$type is not supported") } }
+            { type -> codecMapper.getOrElse(type) { throw IllegalArgumentException("$type is not supported") } }
         )
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, AbstractSkillSource> =
@@ -46,7 +46,7 @@ abstract class AbstractSkillSource {
                 }
             )
 
-        val codecsMapper = mutableMapOf<String, MapCodec<out AbstractSkillSource>>(
+        val codecMapper = mutableMapOf<String, MapCodec<out AbstractSkillSource>>(
             Sources.BLOCK_PLACE to BlockPlaceSource.CODEC,
             Sources.BLOCK_INTERACT to BlockBreakSource.CODEC,
             Sources.BLOCK_BREAK to BlockInteractSource.CODEC,
@@ -77,5 +77,11 @@ abstract class AbstractSkillSource {
             Sources.PLAYER_DAMAGED to PlayerDamagedSource.STREAM_CODEC,
             Sources.PLAYER_DIED to PlayerDiedSource.STREAM_CODEC
         )
+
+        fun registerCodec(path: String, codec: MapCodec<out AbstractSkillSource>) { codecMapper[path] = codec }
+
+        fun registerStream(path: String, streamCodec: StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillSource>) {
+            streamMapper[path] = streamCodec
+        }
     }
 }

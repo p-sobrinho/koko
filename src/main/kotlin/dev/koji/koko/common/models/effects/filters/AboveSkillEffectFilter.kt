@@ -27,7 +27,7 @@ class AboveSkillEffectFilter(
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, AboveSkillEffectFilter> = StreamCodec.composite(
-            ByteBufCodecs.INT, AboveSkillEffectFilter::level,
+            ByteBufCodecs.VAR_INT, AboveSkillEffectFilter::level,
             ByteBufCodecs.DOUBLE, AboveSkillEffectFilter::value,
             AttributeModifier.Operation.STREAM_CODEC, AboveSkillEffectFilter::operation,
             ::AboveSkillEffectFilter

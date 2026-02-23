@@ -27,7 +27,7 @@ class BellowSkillEffectFilter(
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, BellowSkillEffectFilter> = StreamCodec.composite(
-            ByteBufCodecs.INT, BellowSkillEffectFilter::level,
+            ByteBufCodecs.VAR_INT, BellowSkillEffectFilter::level,
             ByteBufCodecs.DOUBLE, BellowSkillEffectFilter::value,
             AttributeModifier.Operation.STREAM_CODEC, BellowSkillEffectFilter::operation,
             ::BellowSkillEffectFilter

@@ -32,20 +32,20 @@ data class SkillSourceFilter(
     companion object {
         val CODEC: Codec<SkillSourceFilter> = RecordCodecBuilder.create { instance ->
             instance.group(
-                FilterType.CODEC.fieldOf("type").forGetter(SkillSourceFilter::type),
-                Codec.STRING.fieldOf("target").forGetter(SkillSourceFilter::target),
-                Codec.INT.optionalFieldOf("priority", 0).forGetter(SkillSourceFilter::priority),
-                Codec.DOUBLE.fieldOf("xp").forGetter(SkillSourceFilter::xp),
-                Codec.BOOL.optionalFieldOf("inverse", false).forGetter(SkillSourceFilter::inverse),
+                FilterType.CODEC.fieldOf("type").forGetter { it.type },
+                Codec.STRING.fieldOf("target").forGetter { it.target },
+                Codec.INT.optionalFieldOf("priority", 0).forGetter { it.priority },
+                Codec.DOUBLE.fieldOf("xp").forGetter { it.xp },
+                Codec.BOOL.optionalFieldOf("inverse", false).forGetter { it.inverse },
             ).apply(instance, ::SkillSourceFilter)
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SkillSourceFilter> = StreamCodec.composite(
-            FilterType.STREAM_CODEC, SkillSourceFilter::type,
-            ByteBufCodecs.STRING_UTF8, SkillSourceFilter::target,
-            ByteBufCodecs.VAR_INT, SkillSourceFilter::priority,
-            ByteBufCodecs.DOUBLE, SkillSourceFilter::xp,
-            ByteBufCodecs.BOOL, SkillSourceFilter::inverse,
+            FilterType.STREAM_CODEC, { it.type },
+            ByteBufCodecs.STRING_UTF8, { it.target },
+            ByteBufCodecs.VAR_INT, { it.priority },
+            ByteBufCodecs.DOUBLE, { it.xp },
+            ByteBufCodecs.BOOL, { it.inverse },
             ::SkillSourceFilter
         )
     }

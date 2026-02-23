@@ -26,8 +26,8 @@ class SpellInscribeSkillEffectFilter(
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SpellInscribeSkillEffectFilter> = StreamCodec.composite(
-            ByteBufCodecs.INT, SpellInscribeSkillEffectFilter::spellLevel,
-            ByteBufCodecs.INT, SpellInscribeSkillEffectFilter::level,
+            ByteBufCodecs.VAR_INT, SpellInscribeSkillEffectFilter::spellLevel,
+            ByteBufCodecs.VAR_INT, SpellInscribeSkillEffectFilter::level,
             ::SpellInscribeSkillEffectFilter
         )
     }

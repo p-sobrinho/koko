@@ -1,6 +1,5 @@
 package dev.koji.koko.common.compact.ironspells
 
-import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.ironspells.effects.SpellCastSkillEffect
 import dev.koji.koko.common.compact.ironspells.effects.SpellInscribeSkillEffect
@@ -187,29 +186,25 @@ object IronSpellsCompact {
     }
 
     fun register() {
-        AbstractSkillSource.codecsMapper[Sources.PLAYER_SPELL_CAST] = SpellCastSource.CODEC
-        AbstractSkillSource.streamMapper[Sources.PLAYER_SPELL_CAST] = SpellCastSource.STREAM_CODEC
+        AbstractSkillSource.registerCodec(Sources.PLAYER_SPELL_CAST, SpellCastSource.CODEC)
+        AbstractSkillEffect.registerCodec(Effects.PLAYER_SPELL_CAST, SpellCastSkillEffect.CODEC)
+        AbstractSkillEffectFilter
+            .registerCodec(EffectsFilters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.CODEC)
 
-        AbstractSkillSource.codecsMapper[Sources.PLAYER_SPELL_INSCRIBE] = SpellInscribeSource.CODEC
-        AbstractSkillSource.streamMapper[Sources.PLAYER_SPELL_INSCRIBE] = SpellInscribeSource.STREAM_CODEC
+        AbstractSkillSource.registerCodec(Sources.PLAYER_SPELL_INSCRIBE, SpellCastSource.CODEC)
+        AbstractSkillEffect.registerCodec(Effects.PLAYER_SPELL_INSCRIBE, SpellInscribeSkillEffect.CODEC)
+        AbstractSkillEffectFilter
+            .registerCodec(EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.CODEC)
 
-        AbstractSkillEffect.codecMapper[Effects.PLAYER_SPELL_CAST] = SpellCastSkillEffect.CODEC
-        AbstractSkillEffect.streamMapper[Effects.PLAYER_SPELL_CAST] = SpellCastSkillEffect.STREAM_CODEC
+        AbstractSkillSource.registerStream(Sources.PLAYER_SPELL_CAST, SpellCastSource.STREAM_CODEC)
+        AbstractSkillEffect.registerStream(Effects.PLAYER_SPELL_CAST, SpellCastSkillEffect.STREAM_CODEC)
+        AbstractSkillEffectFilter
+            .registerStream(EffectsFilters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.STREAM_CODEC)
 
-        AbstractSkillEffect.codecMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.CODEC
-        AbstractSkillEffect.streamMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.STREAM_CODEC
-
-        AbstractSkillEffectFilter.codecsMapper[EffectsFilters.PLAYER_SPELL_CAST_FILTER] =
-            SpellCastSkillEffectFilter.CODEC
-
-        AbstractSkillEffectFilter.codecsMapper[EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER] =
-            SpellInscribeSkillEffectFilter.CODEC
-
-        AbstractSkillEffectFilter.streamMapper[EffectsFilters.PLAYER_SPELL_CAST_FILTER] =
-            SpellCastSkillEffectFilter.STREAM_CODEC
-
-        AbstractSkillEffectFilter.streamMapper[EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER] =
-            SpellInscribeSkillEffectFilter.STREAM_CODEC
+        AbstractSkillSource.registerStream(Sources.PLAYER_SPELL_INSCRIBE, SpellCastSource.STREAM_CODEC)
+        AbstractSkillEffect.registerStream(Effects.PLAYER_SPELL_INSCRIBE, SpellInscribeSkillEffect.STREAM_CODEC)
+        AbstractSkillEffectFilter
+            .registerStream(EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.STREAM_CODEC)
     }
 
 
@@ -244,7 +239,7 @@ object IronSpellsCompact {
     }
 
     object DefaultIronMessages {
-        const val UNABLE_TO_CAST = "&cYou don't feel ready to cast this spell."
-        const val UNABLE_TO_INSCRIBE = "&cYour knowledge is too poor to this spell."
+        const val UNABLE_TO_CAST = "§cYou don't feel ready to cast this spell."
+        const val UNABLE_TO_INSCRIBE = "§cYour knowledge is too poor to this spell."
     }
 }

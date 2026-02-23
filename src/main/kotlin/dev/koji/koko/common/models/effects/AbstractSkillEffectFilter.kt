@@ -18,7 +18,7 @@ abstract class AbstractSkillEffectFilter {
     companion object {
         val CODEC: Codec<AbstractSkillEffectFilter> = Codec.STRING.dispatch(
             { source -> source.type },
-            { type -> codecsMapper[type] ?: throw IllegalArgumentException("$type is not supported") }
+            { type -> codecMapper[type] ?: throw IllegalArgumentException("$type is not supported") }
         )
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, AbstractSkillEffectFilter> =
@@ -41,7 +41,7 @@ abstract class AbstractSkillEffectFilter {
                 }
             )
 
-        val codecsMapper = mutableMapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
+        val codecMapper = mutableMapOf<String, MapCodec<out AbstractSkillEffectFilter>>(
             Filters.ABOVE to AboveSkillEffectFilter.CODEC,
             Filters.RANGE to RangeSkillEffectFilter.CODEC,
             Filters.BELLOW to BellowSkillEffectFilter.CODEC,
@@ -54,5 +54,11 @@ abstract class AbstractSkillEffectFilter {
             Filters.BELLOW to BellowSkillEffectFilter.STREAM_CODEC,
             Filters.BLOCKED to BlockedSkillEffectFilter.STREAM_CODEC
         )
+
+        fun registerCodec(path: String, codec: MapCodec<out AbstractSkillEffectFilter>) { codecMapper[path] = codec }
+
+        fun registerStream(path: String, streamCodec: StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>) {
+           streamMapper[path] = streamCodec
+        }
     }
 }

@@ -28,8 +28,8 @@ class RangeSkillEffectFilter(
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, RangeSkillEffectFilter> = StreamCodec.composite(
-            ByteBufCodecs.INT, RangeSkillEffectFilter::from,
-            ByteBufCodecs.INT, RangeSkillEffectFilter::to,
+            ByteBufCodecs.VAR_INT, RangeSkillEffectFilter::from,
+            ByteBufCodecs.VAR_INT, RangeSkillEffectFilter::to,
             ByteBufCodecs.DOUBLE, RangeSkillEffectFilter::value,
             AttributeModifier.Operation.STREAM_CODEC, RangeSkillEffectFilter::operation,
             ::RangeSkillEffectFilter
