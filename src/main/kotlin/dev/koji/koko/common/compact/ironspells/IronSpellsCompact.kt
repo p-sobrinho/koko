@@ -29,7 +29,6 @@ object IronSpellsCompact {
     fun onSpellPreCast(event: SpellPreCastEvent) {
         val player = event.entity
 
-        Koko.LOGGER.info(event.spellId)
         val spellData = SpellData(MainHelper.safeParseResource(event.spellId), event.spellLevel, false)
 
         if (!this.isSpellBlockedFor(player, spellData, ISSBlockScope.CAST)) return
@@ -44,7 +43,9 @@ object IronSpellsCompact {
 
     @SubscribeEvent
     fun onSpellCast(event: SpellOnCastEvent) {
+        val spellData = SpellData(MainHelper.safeParseResource(event.spellId), event.spellLevel, false)
 
+        this.processSpellEvaluate(Sources.PLAYER_SPELL_CAST, spellData, event.entity)
     }
 
     @SubscribeEvent
