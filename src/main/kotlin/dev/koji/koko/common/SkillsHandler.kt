@@ -17,16 +17,6 @@ import net.minecraft.world.level.Level
 import net.neoforged.neoforge.network.PacketDistributor
 
 object SkillsHandler {
-    fun safeParseResource(resource: String, allowTag: Boolean = true): ResourceLocation {
-        if (!allowTag && resource.contains("#"))
-            throw RuntimeException("$resource must not be a tag.")
-
-        return if (resource.contains(":"))
-            ResourceLocation.parse(resource.removePrefix("#"))
-        else
-            ResourceLocation.fromNamespaceAndPath("minecraft", resource)
-    }
-
     fun syncNewSkills(player: Player) {
         val level = player.level()
 

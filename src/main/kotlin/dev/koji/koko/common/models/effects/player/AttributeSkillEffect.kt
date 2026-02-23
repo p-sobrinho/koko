@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.effects.Effects
@@ -53,7 +54,7 @@ class AttributeSkillEffect(
     ) {
         val attributes = player.attributes
 
-        val attributeLocation = SkillsHandler.safeParseResource(attribute)
+        val attributeLocation = MainHelper.safeParseResource(attribute)
 
         val attributeHolder = BuiltInRegistries.ATTRIBUTE.getHolder(
             ResourceKey.create(Registries.ATTRIBUTE, attributeLocation)

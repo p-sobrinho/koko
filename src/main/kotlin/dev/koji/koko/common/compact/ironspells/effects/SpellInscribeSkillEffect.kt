@@ -15,11 +15,11 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.entity.player.Player
 
-class SpellCastSkillEffect(
+class SpellInscribeSkillEffect(
     val spell: String,
     val filters: List<AbstractSkillEffectFilter>
 ) : AbstractSkillEffect() {
-    override val type: String = IronSpellsCompact.Effects.PLAYER_SPELL_CAST
+    override val type: String = IronSpellsCompact.Effects.PLAYER_SPELL_INSCRIBE
 
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? {
         val applicableFilters = filters.filter { it.apply(level) }
@@ -39,28 +39,28 @@ class SpellCastSkillEffect(
         val filter = applier.filter as? SpellInscribeSkillEffectFilter ?: return
 
         IronSpellsCompact.addBlockedSpell(
-            player.uuid, MainHelper.safeParseResource(spell), filter.spellLevel,  IronSpellsCompact.ISSBlockScope.SPELL
+            player.uuid, MainHelper.safeParseResource(spell), filter.spellLevel, IronSpellsCompact.ISSBlockScope.INSCRIBE
         )
     }
 
     override fun unApply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         IronSpellsCompact.removeBlockedSpell(
-            player.uuid, MainHelper.safeParseResource(spell), IronSpellsCompact.ISSBlockScope.SPELL
+            player.uuid, MainHelper.safeParseResource(spell), IronSpellsCompact.ISSBlockScope.INSCRIBE
         )
     }
 
     companion object {
-        val CODEC: MapCodec<SpellCastSkillEffect> = RecordCodecBuilder.mapCodec { instance ->
+        val CODEC: MapCodec<SpellInscribeSkillEffect> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                Codec.STRING.fieldOf("spell").forGetter(SpellCastSkillEffect::spell),
-                AbstractSkillEffectFilter.CODEC.listOf().fieldOf("filters").forGetter(SpellCastSkillEffect::filters)
-            ).apply(instance, ::SpellCastSkillEffect)
+                Codec.STRING.fieldOf("spell").forGetter(SpellInscribeSkillEffect::spell),
+                AbstractSkillEffectFilter.CODEC.listOf().fieldOf("filters").forGetter(SpellInscribeSkillEffect::filters)
+            ).apply(instance, ::SpellInscribeSkillEffect)
         }
 
-        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SpellCastSkillEffect> = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, SpellCastSkillEffect::spell,
-            AbstractSkillEffectFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), SpellCastSkillEffect::filters,
-            ::SpellCastSkillEffect
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SpellInscribeSkillEffect> = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, SpellInscribeSkillEffect::spell,
+            AbstractSkillEffectFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), SpellInscribeSkillEffect::filters,
+            ::SpellInscribeSkillEffect
         )
     }
 }

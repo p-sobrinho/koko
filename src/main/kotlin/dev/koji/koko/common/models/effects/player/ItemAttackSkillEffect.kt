@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.events.PlayerEventHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.effects.Effects
@@ -29,7 +30,7 @@ class ItemAttackSkillEffect(
 
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         PlayerEventHandler.addBlockedItem(
-            player.uuid, SkillsHandler.safeParseResource(item), PlayerEventHandler.BlockScope.ATTACK
+            player.uuid, MainHelper.safeParseResource(item), PlayerEventHandler.PlayerBlockScope.ATTACK
         )
     }
 
@@ -38,7 +39,7 @@ class ItemAttackSkillEffect(
         player: Player
     ) {
         PlayerEventHandler.removeBlockedItem(
-            player.uuid, SkillsHandler.safeParseResource(item), PlayerEventHandler.BlockScope.ATTACK
+            player.uuid, MainHelper.safeParseResource(item), PlayerEventHandler.PlayerBlockScope.ATTACK
         )
     }
 

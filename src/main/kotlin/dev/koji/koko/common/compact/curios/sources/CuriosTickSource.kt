@@ -3,7 +3,7 @@ package dev.koji.koko.common.compact.curios.sources
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import dev.koji.koko.common.compact.curios.CuriosSources
+import dev.koji.koko.common.compact.curios.CuriosCompact
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -14,7 +14,7 @@ class CuriosTickSource(
     override val filters: List<SkillSourceFilter>,
     override val alwaysApply: Boolean
 ) : AbstractSkillSource() {
-    override val type: String = CuriosSources.PLAYER_CURIOUS_USE
+    override val type: String = CuriosCompact.Sources.PLAYER_CURIOUS_USE
 
     companion object {
         val CODEC: MapCodec<CuriosTickSource> = RecordCodecBuilder.mapCodec { instance ->

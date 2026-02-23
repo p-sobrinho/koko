@@ -4,8 +4,9 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.SkillsHandler
-import dev.koji.koko.common.compact.curios.CuriosEffects
+import dev.koji.koko.common.compact.curios.CuriosCompact
 import dev.koji.koko.common.events.PlayerEventHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.effects.filters.BlockedSkillEffectFilter
@@ -18,7 +19,7 @@ class CuriosEquipSkillEffect(
     val curio: String,
     val filter: AbstractSkillEffectFilter
 ) : AbstractSkillEffect() {
-    override val type: String = CuriosEffects.PLAYER_CURIOS_EQUIP
+    override val type: String = CuriosCompact.Effects.PLAYER_CURIOS_EQUIP
 
     override fun doAnyApplies(level: Int): AbstractSkillEffectFilter? {
         if (filter !is BlockedSkillEffectFilter)
@@ -29,7 +30,7 @@ class CuriosEquipSkillEffect(
 
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         PlayerEventHandler.addBlockedItem(
-            player.uuid, SkillsHandler.safeParseResource(curio), PlayerEventHandler.BlockScope.CURIOS
+            player.uuid, MainHelper.safeParseResource(curio), PlayerEventHandler.PlayerBlockScope.CURIOS
         )
     }
 
@@ -38,7 +39,7 @@ class CuriosEquipSkillEffect(
         player: Player
     ) {
         PlayerEventHandler.removeBlockedItem(
-            player.uuid, SkillsHandler.safeParseResource(curio), PlayerEventHandler.BlockScope.CURIOS
+            player.uuid, MainHelper.safeParseResource(curio), PlayerEventHandler.PlayerBlockScope.CURIOS
         )
     }
 

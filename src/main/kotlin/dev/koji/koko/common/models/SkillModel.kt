@@ -2,7 +2,7 @@ package dev.koji.koko.common.models
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
-import dev.koji.koko.common.ktx.StreamCodecKTX
+import dev.koji.koko.common.helpers.StreamHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -28,7 +28,7 @@ data class SkillModel(
             ).apply(instance, ::SkillModel)
         }
 
-        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SkillModel> = StreamCodecKTX.composite(
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, SkillModel> = StreamHelper.composite(
             ByteBufCodecs.STRING_UTF8, SkillModel::displayName,
             ByteBufCodecs.STRING_UTF8, SkillModel::icon,
             ByteBufCodecs.STRING_UTF8, SkillModel::description,

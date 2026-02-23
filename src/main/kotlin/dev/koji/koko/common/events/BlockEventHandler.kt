@@ -2,6 +2,7 @@ package dev.koji.koko.common.events
 
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import dev.koji.koko.common.models.sources.Sources
@@ -86,7 +87,7 @@ object BlockEventHandler {
     }
 
     private fun blockMatches(blockState: BlockState, targetLocation: String): Boolean {
-        val resourceLocation = SkillsHandler.safeParseResource(targetLocation)
+        val resourceLocation = MainHelper.safeParseResource(targetLocation)
         val tagKey = TagKey.create(Registries.BLOCK, resourceLocation)
 
         return (blockState.`is`(tagKey) || blockState.`is`(ResourceKey.create(Registries.BLOCK, resourceLocation)))

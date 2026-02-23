@@ -4,8 +4,10 @@ import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.curios.effects.CuriosEquipSkillEffect
 import dev.koji.koko.common.compact.curios.sources.CuriosTickSource
 import dev.koji.koko.common.events.PlayerEventHandler
-import dev.koji.koko.common.events.PlayerEventHandler.BlockScope
-import dev.koji.koko.common.events.PlayerEventHandler.EventMessage
+import dev.koji.koko.common.events.PlayerEventHandler.BlockedPlayerInstance
+import dev.koji.koko.common.events.PlayerEventHandler.DefaultPlayerMessages
+import dev.koji.koko.common.events.PlayerEventHandler.PlayerBlockScope
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
@@ -18,8 +20,13 @@ import net.neoforged.neoforge.common.util.TriState
 import net.neoforged.neoforge.event.tick.PlayerTickEvent
 import top.theillusivec4.curios.api.CuriosApi
 import top.theillusivec4.curios.api.event.CurioCanEquipEvent
+import java.time.Instant
 
-class CuriosCompact {
+object CuriosCompact {
+    private val BLOCKED_PLAYER_INSTANCES = mutableSetOf<BlockedPlayerInstance>()
+
+    private val MESSAGES_COOLDOWNS = HashMap<DefaultPlayerMessages, Instant>()
+
     @SubscribeEvent
     fun onPlayerTick(event: PlayerTickEvent.Post) {
         val player = event.entity
@@ -38,14 +45,14 @@ class CuriosCompact {
 
             if (curioAt == ItemStack.EMPTY) continue
 
-            if (!PlayerEventHandler.isItemBlockedFor(player, curioAt, BlockScope.CURIOS)) continue
+            if (!PlayerEventHandler.isItemBlockedFor(player, curioAt, PlayerBlockScope.CURIOS)) continue
 
             player.addEffect(MobEffectInstance(
                 MobEffects.MOVEMENT_SLOWDOWN,
                 20, 10
             ))
 
-            PlayerEventHandler.triggerMessage(player, EventMessage.UNABLE_TO_CURIOS)
+            MainHelper.sendMessageToPlayer(player, DefaultCuriosMessages.UNABLE_TO_WEAR)
 
             break
         }
@@ -55,13 +62,13 @@ class CuriosCompact {
     fun onCuriosSlotEquipTry(event: CurioCanEquipEvent) {
         val player = (event.entity as? Player) ?: return
 
-        if (!PlayerEventHandler.isItemBlockedFor(player, event.stack, BlockScope.CURIOS)) return
+        if (!PlayerEventHandler.isItemBlockedFor(player, event.stack, PlayerBlockScope.CURIOS)) return
 
         event.equipResult = TriState.FALSE
 
         if (!player.level().isClientSide) return
 
-        PlayerEventHandler.triggerMessage(player, EventMessage.UNABLE_TO_CURIOS)
+        MainHelper.sendMessageToPlayer(player, DefaultCuriosMessages.UNABLE_TO_WEAR)
     }
 
     fun processCuriosEvaluate(
@@ -123,5 +130,9 @@ class CuriosCompact {
 
     object Effects {
         const val PLAYER_CURIOS_EQUIP = "player/curios_equip"
+    }
+
+    object DefaultCuriosMessages {
+        const val UNABLE_TO_WEAR = "&cYou aren't worth of using this curio."
     }
 }

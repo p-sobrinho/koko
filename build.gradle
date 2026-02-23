@@ -22,6 +22,11 @@ repositories {
         name = "Curios"
         url = uri("https://maven.theillusivec4.top/")
     }
+
+    maven {
+        name = "Iron's Maven - Release"
+        url = "https://code.redspace.io/releases"
+    }
 }
 
 base {
@@ -76,6 +81,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     implementation "thedarkcolour:kotlinforforge-neoforge:${kotlin_for_forge_version}"
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_api_version}+${minecraft_version}:api"
+    compileOnly "io.redspace:irons_spellbooks:${minecraft_version}-${iron_spells_version}:api"
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

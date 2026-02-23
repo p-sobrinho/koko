@@ -2,6 +2,7 @@ package dev.koji.koko.client.ui
 
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.SkillData
 import dev.koji.koko.common.models.SkillModel
 import net.minecraft.ChatFormatting
@@ -100,7 +101,7 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
                 val skillData = slot.skillData
                 val skillModel = slot.skillModel
 
-                val skillIcon = getItemStackFromRL(SkillsHandler.safeParseResource(skillModel.icon)).apply {
+                val skillIcon = getItemStackFromRL(MainHelper.safeParseResource(skillModel.icon)).apply {
                     remove(DataComponents.ATTRIBUTE_MODIFIERS)
 
                     set(DataComponents.CUSTOM_NAME, Component.translatable(skillModel.displayName))
@@ -142,7 +143,7 @@ class SkillsScreen : Screen(Component.literal("Skills Screen")) {
             val itemY = y + (height - 16) / 2
 
             graphics.renderFakeItem(getItemStackFromRL(
-                SkillsHandler.safeParseResource(skillModel.icon)
+                MainHelper.safeParseResource(skillModel.icon)
             ), itemX, itemY)
 
             graphics.fill(x, y, x + width, y + 1, 0xFFFFFFFF.toInt())

@@ -1,79 +1,140 @@
 package dev.koji.koko.common.compact.ironspells
 
 import dev.koji.koko.common.SkillsHandler
-import dev.koji.koko.common.compact.curios.effects.CuriosEquipSkillEffect
-import dev.koji.koko.common.compact.curios.sources.CuriosTickSource
-import dev.koji.koko.common.events.PlayerEventHandler
-import dev.koji.koko.common.events.PlayerEventHandler.BlockScope
-import dev.koji.koko.common.events.PlayerEventHandler.EventMessage
+import dev.koji.koko.common.compact.ironspells.effects.SpellCastSkillEffect
+import dev.koji.koko.common.compact.ironspells.effects.SpellInscribeSkillEffect
+import dev.koji.koko.common.compact.ironspells.sources.SpellCastSource
+import dev.koji.koko.common.compact.ironspells.sources.SpellInscribeSource
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
+import io.redspace.ironsspellbooks.api.events.InscribeSpellEvent
+import io.redspace.ironsspellbooks.api.events.SpellOnCastEvent
+import io.redspace.ironsspellbooks.api.events.SpellPreCastEvent
+import io.redspace.ironsspellbooks.api.spells.SpellData
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.ItemStack
 import net.neoforged.bus.api.SubscribeEvent
-import net.neoforged.neoforge.common.util.TriState
-import net.neoforged.neoforge.event.tick.PlayerTickEvent
-import top.theillusivec4.curios.api.CuriosApi
-import top.theillusivec4.curios.api.event.CurioCanEquipEvent
-import kotlin.collections.set
+import java.util.*
 
-class IronSpellsCompact {
+object IronSpellsCompact {
+    private val BLOCKED_PLAYER_INSTANCES = mutableSetOf<BlockedSpellInstance>()
+
     @SubscribeEvent
-    fun onPlayerTick(event: PlayerTickEvent.Post) {
+    fun onSpellPreCast(event: SpellPreCastEvent) {
         val player = event.entity
 
-        if (player.level().isClientSide) return
+        val spellData = SpellData(MainHelper.safeParseResource(event.spellId), event.spellLevel, false)
 
-        val optional = CuriosApi.getCuriosInventory(player)
+        if (!this.isSpellBlockedFor(player, spellData, ISSBlockScope.SPELL)) return
 
-        if (optional.isEmpty) return
-
-        val inventory = optional.get()
-        val equippedCurios = inventory.equippedCurios
-
-        for (i in 1..equippedCurios.slots) {
-            val curioAt = equippedCurios.getStackInSlot(i)
-
-            if (curioAt == ItemStack.EMPTY) continue
-
-            if (!PlayerEventHandler.isItemBlockedFor(player, curioAt, BlockScope.CURIOS)) continue
-
-            player.addEffect(MobEffectInstance(
-                MobEffects.MOVEMENT_SLOWDOWN,
-                20, 10
-            ))
-
-            PlayerEventHandler.triggerMessage(player, EventMessage.UNABLE_TO_CURIOS)
-
-            break
-        }
-    }
-
-    @SubscribeEvent
-    fun onCuriosSlotEquipTry(event: CurioCanEquipEvent) {
-        val player = (event.entity as? Player) ?: return
-
-        if (!PlayerEventHandler.isItemBlockedFor(player, event.stack, BlockScope.CURIOS)) return
-
-        event.equipResult = TriState.FALSE
+        event.isCanceled = true
 
         if (!player.level().isClientSide) return
 
-        PlayerEventHandler.triggerMessage(player, EventMessage.UNABLE_TO_CURIOS)
+        MainHelper.sendMessageToPlayer(player, DefaultIronMessages.UNABLE_TO_CAST)
     }
 
-    fun processCuriosEvaluate(
+    @SubscribeEvent
+    fun onSpellCast(event: SpellOnCastEvent) {
+
+    }
+
+    @SubscribeEvent
+    fun onSpellInscribe(event: InscribeSpellEvent) {
+        val player = event.entity
+
+        if (this.isSpellBlockedFor(player, event.spellData, ISSBlockScope.INSCRIBE)) {
+            event.isCanceled = true
+
+            if (!player.level().isClientSide) return
+
+            MainHelper.sendMessageToPlayer(player, DefaultIronMessages.UNABLE_TO_INSCRIBE)
+
+            return
+        }
+
+        this.processSpellEvaluate(Sources.PLAYER_SPELL_INSCRIBE, event.spellData, player)
+    }
+
+    fun addBlockedSpell(uuid: UUID, spellId: ResourceLocation, spellLevel: Int, scope: ISSBlockScope) {
+        val blockedItems = this.getBlockedPlayerInstance(uuid).blockedItems
+        var blockedItem = blockedItems.find { it.location == spellId }
+
+        if (blockedItem == null) {
+            blockedItem = BlockedSpell(spellId, spellLevel, mutableSetOf())
+
+            blockedItems.add(blockedItem)
+        }
+
+        blockedItem.scopes.add(scope)
+    }
+
+    fun removeBlockedSpell(uuid: UUID, spellLocation: ResourceLocation, scope: ISSBlockScope) {
+        val blockedItem = this.getBlockedPlayerInstance(uuid).blockedItems.find { it.location == spellLocation }
+
+        if (blockedItem == null) return
+
+        blockedItem.scopes.removeIf { it == scope }
+    }
+
+    fun clearBlockedItemsFor(uuid: UUID, scope: ISSBlockScope) {
+        for (blockedItem in this.getBlockedPlayerInstance(uuid).blockedItems) {
+            blockedItem.scopes.removeIf { it == scope }
+        }
+    }
+
+    fun clearAllBlockedItemsFor(uuid: UUID) = this.getBlockedPlayerInstance(uuid).blockedItems.clear()
+
+    fun isSpellBlockedFor(player: Player, spellData: SpellData, scope: ISSBlockScope): Boolean =
+        this.isSpellBlockedFor(player.uuid, spellData, scope)
+
+    fun isSpellBlockedFor(uuid: UUID, spellData: SpellData, scope: ISSBlockScope): Boolean {
+        val blockedRecipes = this.getBlockedItemsInScope(uuid, scope)
+
+        val isBlocked = blockedRecipes.find { this.isSpellLevelIsRestricted(spellData, it.level) }
+
+        return (isBlocked != null)
+    }
+
+    fun isSpellLevelIsRestricted(spellData: SpellData, level: Int): Boolean = (spellData.level > level)
+
+    fun getBlockedItemsInScope(uuid: UUID, scope: ISSBlockScope): Set<BlockedSpell> {
+        val blockedItems = BLOCKED_PLAYER_INSTANCES.find { it.uuid == uuid }
+            ?.blockedItems
+            ?.filter { it.scopes.contains(scope) }
+            ?.toSet()
+
+        return blockedItems ?: emptySet()
+    }
+
+    fun getBlockedPlayerInstance(player: Player) =
+        this.getBlockedPlayerInstance(player.uuid)
+
+    fun getBlockedPlayerInstance(uuid: UUID): BlockedSpellInstance {
+        var foundInstance = BLOCKED_PLAYER_INSTANCES.find {
+            it.uuid == uuid
+        }
+
+        if (foundInstance == null) {
+            foundInstance = BlockedSpellInstance(uuid, mutableSetOf())
+
+            BLOCKED_PLAYER_INSTANCES.add(foundInstance)
+        }
+
+        return foundInstance
+    }
+
+    fun processSpellEvaluate(
         source: String,
-        item: ItemStack,
+        spell: SpellData,
         player: Player
     ) {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
         for (listener in listeners) {
-            val xp = this.playerCuriosEvaluate(listener.sourceData, item)
+            val xp = this.playerSpellEvaluate(listener.sourceData, spell)
 
             if (xp == 0.0) continue
 
@@ -81,10 +142,10 @@ class IronSpellsCompact {
         }
     }
 
-    fun playerCuriosEvaluate(skillModel: AbstractSkillSource, item: ItemStack): Double =
-        playerCuriosEvaluate(skillModel.filters, item)
+    fun playerSpellEvaluate(skillModel: AbstractSkillSource, spellData: SpellData): Double =
+        this.playerSpellEvaluate(skillModel.filters, spellData)
 
-    fun playerCuriosEvaluate(filters: List<SkillSourceFilter>, item: ItemStack): Double {
+    fun playerSpellEvaluate(filters: List<SkillSourceFilter>, spellData: SpellData): Double {
         if (filters.isEmpty()) return 0.0
 
         val whitelists = filters.filter { it.type == SkillSourceFilter.FilterType.WHITELIST }
@@ -93,36 +154,67 @@ class IronSpellsCompact {
         val blacklists = filters.filter { it.type == SkillSourceFilter.FilterType.BLACKLIST }
             .sortedByDescending { it.priority }
 
+        val spellId = spellData.spell.spellId
+
         for (blacklist in blacklists) {
-            if (PlayerEventHandler.itemMatches(item, blacklist.target)) return 0.0
+            if (spellId == blacklist.target) return 0.0
         }
 
         if (whitelists.isEmpty()) return 0.0
 
         for (whitelist in whitelists) {
-            if (PlayerEventHandler.itemMatches(item, whitelist.target)) {
+            if (spellId == whitelist.target) {
                 val xp = whitelist.xp
 
                 return if (whitelist.inverse) -xp else xp
-            }
+           }
         }
 
         return 0.0
     }
 
     fun register() {
-        AbstractSkillSource.codecsMapper[Sources.PLAYER_CURIOUS_USE] = CuriosTickSource.CODEC
-        AbstractSkillSource.streamMapper[Sources.PLAYER_CURIOUS_USE] = CuriosTickSource.STREAM_CODEC
+        AbstractSkillSource.codecsMapper[Sources.PLAYER_SPELL_CAST] = SpellCastSource.CODEC
+        AbstractSkillSource.streamMapper[Sources.PLAYER_SPELL_CAST] = SpellCastSource.STREAM_CODEC
 
-        AbstractSkillEffect.codecMapper[Effects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.CODEC
-        AbstractSkillEffect.streamMapper[Effects.PLAYER_CURIOS_EQUIP] = CuriosEquipSkillEffect.STREAM_CODEC
+        AbstractSkillSource.codecsMapper[Sources.PLAYER_SPELL_INSCRIBE] = SpellInscribeSource.CODEC
+        AbstractSkillSource.streamMapper[Sources.PLAYER_SPELL_INSCRIBE] = SpellInscribeSource.STREAM_CODEC
+
+        AbstractSkillEffect.codecMapper[Effects.PLAYER_SPELL_CAST] = SpellCastSkillEffect.CODEC
+        AbstractSkillEffect.streamMapper[Effects.PLAYER_SPELL_CAST] = SpellCastSkillEffect.STREAM_CODEC
+
+        AbstractSkillEffect.codecMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.CODEC
+        AbstractSkillEffect.streamMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.STREAM_CODEC
     }
 
+
+    data class BlockedSpellInstance(
+        val uuid: UUID,
+        val blockedItems: MutableSet<BlockedSpell>,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return other is BlockedSpellInstance && other.uuid == this.uuid
+        }
+
+        override fun hashCode(): Int = uuid.hashCode()
+    }
+
+    data class BlockedSpell(val location: ResourceLocation, val level: Int, val scopes: MutableSet<ISSBlockScope>)
+
+    enum class ISSBlockScope { SPELL, INSCRIBE }
+
     object Sources {
-        const val PLAYER_CURIOUS_USE = "player/curios_use"
+        const val PLAYER_SPELL_CAST = "player/ispell_cast"
+        const val PLAYER_SPELL_INSCRIBE = "player/ispell_inscribe"
     }
 
     object Effects {
-        const val PLAYER_CURIOS_EQUIP = "player/curios_equip"
+        const val PLAYER_SPELL_CAST = "player/ispell_precast"
+        const val PLAYER_SPELL_INSCRIBE = "player/ispell_preinscribe"
+    }
+
+    object DefaultIronMessages {
+        const val UNABLE_TO_CAST = "&cYou don't feel ready to cast this spell."
+        const val UNABLE_TO_INSCRIBE = "&cYour knowledge is too poor to this spell."
     }
 }

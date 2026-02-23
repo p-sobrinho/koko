@@ -1,12 +1,12 @@
 package dev.koji.koko.common.events
 
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import dev.koji.koko.common.models.sources.Sources
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -28,14 +28,11 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemCraftedEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import net.neoforged.neoforge.event.tick.PlayerTickEvent
-import java.time.Instant
 import java.util.*
 
 @EventBusSubscriber
 object PlayerEventHandler {
     private val BLOCKED_PLAYER_INSTANCES = mutableSetOf<BlockedPlayerInstance>()
-
-    private val MESSAGES_COOLDOWNS = HashMap<EventMessage, Instant>()
 
     @SubscribeEvent
     fun onPlayerJoin(event: PlayerEvent.PlayerLoggedInEvent) = this.doPlayerStuff(event.entity)
@@ -63,12 +60,12 @@ object PlayerEventHandler {
         val player = event.entity
         val item = player.mainHandItem
 
-        if (this.isItemBlockedFor(player, item, BlockScope.USE)){
+        if (this.isItemBlockedFor(player, item, PlayerBlockScope.USE)){
             event.isCanceled = true
 
             if (!player.level().isClientSide) return
 
-            this.triggerMessage(player, EventMessage.UNABLE_TO_USE)
+            MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_USE)
         }
 
         if (player.level().isClientSide) return
@@ -81,12 +78,12 @@ object PlayerEventHandler {
         val player = event.entity
         val item = player.mainHandItem
 
-        if (this.isItemBlockedFor(player, item, BlockScope.ATTACK)) {
+        if (this.isItemBlockedFor(player, item, PlayerBlockScope.ATTACK)) {
             event.isCanceled = true
 
             if (!player.level().isClientSide) return
 
-            this.triggerMessage(player, EventMessage.UNABLE_TO_ATTACK)
+            MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_ATTACK)
         }
 
         if (player.level().isClientSide) return
@@ -99,13 +96,13 @@ object PlayerEventHandler {
         val player = (event.entity as? Player) ?: return
         val item = event.item
 
-        if (this.isItemBlockedFor(player, item, BlockScope.CONSUME)) {
+        if (this.isItemBlockedFor(player, item, PlayerBlockScope.CONSUME)) {
 
             event.isCanceled = true
 
             if (!player.level().isClientSide) return
 
-            this.triggerMessage(player, EventMessage.UNABLE_TO_CONSUME)
+            MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_CONSUME)
 
             return
         }
@@ -120,12 +117,12 @@ object PlayerEventHandler {
         val player = event.entity
         val result = event.crafting
 
-        if (this.isItemBlockedFor(player, result, BlockScope.CRAFT)) {
+        if (this.isItemBlockedFor(player, result, PlayerBlockScope.CRAFT)) {
 
             result.count = 0
 
             if (player.level().isClientSide) {
-                this.triggerMessage(player, EventMessage.UNABLE_TO_CRAFT)
+                MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_CRAFT)
 
                 this.spawnDenyParticles(player)
                 this.playDenySound(player)
@@ -152,22 +149,21 @@ object PlayerEventHandler {
     fun onAnvilUpdate(event: AnvilUpdateEvent) {
         val player = event.player
 
-        if (!this.isItemBlockedFor(player, event.left, BlockScope.FORGE)) return
+        if (!this.isItemBlockedFor(player, event.left, PlayerBlockScope.FORGE)) return
 
         event.isCanceled = true
 
         if (!player.level().isClientSide) return
 
-        this.triggerMessage(player, EventMessage.UNABLE_TO_FORGE)
+        MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_FORGE)
     }
 
-    fun isItemBlockedFor(player: Player, item: ItemStack, scope: BlockScope): Boolean {
+    fun isItemBlockedFor(player: Player, item: ItemStack, scope: PlayerBlockScope): Boolean =
+        this.isItemBlockedFor(player.uuid, item, scope)
+
+    fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: PlayerBlockScope): Boolean {
         if (item.isEmpty) return false
 
-        return this.isItemBlockedFor(player.uuid, item, scope)
-    }
-
-    fun isItemBlockedFor(uuid: UUID, item: ItemStack, scope: BlockScope): Boolean {
         val blockedRecipes = this.getBlockedItemsInScope(uuid, scope)
 
         val isBlocked = blockedRecipes.find { this.itemMatches(item, it.location) }
@@ -175,7 +171,18 @@ object PlayerEventHandler {
         return (isBlocked != null)
     }
 
-    fun getBlockedItemsInScope(uuid: UUID, scope: BlockScope): Set<BlockedItem> {
+    fun isResourceBlockedFor(player: Player, resource: ResourceLocation, scope: PlayerBlockScope): Boolean =
+        this.isResourceBlockedFor(player.uuid, resource, scope)
+
+    fun isResourceBlockedFor(uuid: UUID, resource: ResourceLocation, scope: PlayerBlockScope): Boolean {
+        val blockedRecipes = this.getBlockedItemsInScope(uuid, scope)
+
+        val isBlocked = blockedRecipes.find { resource == it.location }
+
+        return (isBlocked != null)
+    }
+
+    fun getBlockedItemsInScope(uuid: UUID, scope: PlayerBlockScope): Set<BlockedItem> {
         val blockedItems = BLOCKED_PLAYER_INSTANCES.find { it.uuid == uuid }
             ?.blockedItems
             ?.filter { it.scopes.contains(scope) }
@@ -207,14 +214,14 @@ object PlayerEventHandler {
         for (i in 36..39) {
             val armor = playerInventory.getItem(i)
 
-            if (!this.isItemBlockedFor(player, armor, BlockScope.ARMOR)) continue
+            if (!this.isItemBlockedFor(player, armor, PlayerBlockScope.ARMOR)) continue
 
             player.addEffect(MobEffectInstance(
                 MobEffects.MOVEMENT_SLOWDOWN,
                 20, 3
             ))
 
-            this.triggerMessage(player, EventMessage.UNABLE_TO_ARMOR)
+            MainHelper.sendMessageToPlayer(player, DefaultPlayerMessages.UNABLE_TO_ARMOR)
         }
     }
 
@@ -263,7 +270,7 @@ object PlayerEventHandler {
         return 0.0
     }
 
-    fun addBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
+    fun addBlockedItem(uuid: UUID, item: ResourceLocation, scope: PlayerBlockScope) {
         val blockedItems = this.getBlockedPlayerInstance(uuid).blockedItems
         var blockedItem = blockedItems.find { it.location == item }
 
@@ -276,7 +283,7 @@ object PlayerEventHandler {
         blockedItem.scopes.add(scope)
     }
 
-    fun removeBlockedItem(uuid: UUID, item: ResourceLocation, scope: BlockScope) {
+    fun removeBlockedItem(uuid: UUID, item: ResourceLocation, scope: PlayerBlockScope) {
         val blockedItem = this.getBlockedPlayerInstance(uuid).blockedItems.find { it.location == item }
 
         if (blockedItem == null) return
@@ -284,7 +291,7 @@ object PlayerEventHandler {
         blockedItem.scopes.removeIf { it == scope }
     }
 
-    fun clearBlockedItemsFor(uuid: UUID, scope: BlockScope) {
+    fun clearBlockedItemsFor(uuid: UUID, scope: PlayerBlockScope) {
         for (blockedItem in this.getBlockedPlayerInstance(uuid).blockedItems) {
             blockedItem.scopes.removeIf { it == scope }
         }
@@ -292,28 +299,9 @@ object PlayerEventHandler {
 
     fun clearAllBlockedItemsFor(uuid: UUID) = this.getBlockedPlayerInstance(uuid).blockedItems.clear()
 
-    fun triggerMessage(player: Player, eventMessage: EventMessage) {
-        val cooldown = MESSAGES_COOLDOWNS.get(eventMessage)
-
-        if (cooldown != null && cooldown.isAfter(Instant.now())) return
-
-        val message = when (eventMessage) {
-            EventMessage.UNABLE_TO_USE -> "§cYou don't know how to use this item..."
-            EventMessage.UNABLE_TO_ATTACK -> "§cYou feel too weak to wield this weapon..."
-            EventMessage.UNABLE_TO_CONSUME -> "§cYou don't know how to properly consume this item..."
-            EventMessage.UNABLE_TO_CRAFT -> "§cYou have no idea what to do with these items..."
-            EventMessage.UNABLE_TO_FORGE -> "§cYou don't know how to enchant this item..."
-            EventMessage.UNABLE_TO_ARMOR -> "§cYou feel to weak to support this armor..."
-            EventMessage.UNABLE_TO_CURIOS -> "§cYou aren't worth of using this curio..."
-        }
-
-        MESSAGES_COOLDOWNS[eventMessage] = Instant.now().plusSeconds(1)
-
-        player.sendSystemMessage(Component.literal(message))
-    }
-
     fun itemMatches(item: ItemStack, targetLocation: String): Boolean =
-        this.itemMatches(item, SkillsHandler.safeParseResource(targetLocation))
+        this.itemMatches(item, MainHelper.safeParseResource(targetLocation))
+
     fun itemMatches(item: ItemStack, resourceLocation: ResourceLocation): Boolean {
         if (item.`is`(TagKey.create(Registries.ITEM, resourceLocation))) return true
 
@@ -355,16 +343,6 @@ object PlayerEventHandler {
         level.playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS)
     }
 
-    enum class EventMessage {
-        UNABLE_TO_USE, UNABLE_TO_ATTACK, UNABLE_TO_CONSUME,
-        UNABLE_TO_CRAFT, UNABLE_TO_FORGE, UNABLE_TO_ARMOR,
-        UNABLE_TO_CURIOS
-    }
-
-    enum class BlockScope {
-        USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR, CURIOS, ISPELL
-    }
-
     data class BlockedPlayerInstance(
         val uuid: UUID,
         val blockedItems: MutableSet<BlockedItem>,
@@ -376,5 +354,16 @@ object PlayerEventHandler {
         override fun hashCode(): Int = uuid.hashCode()
     }
 
-    data class BlockedItem(val location: ResourceLocation, val scopes: MutableSet<BlockScope>)
+    data class BlockedItem(val location: ResourceLocation, val scopes: MutableSet<PlayerBlockScope>)
+
+    enum class PlayerBlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR, CURIOS, ISPELL }
+
+    object DefaultPlayerMessages {
+        const val UNABLE_TO_USE = "&cYou don't know how to use this item."
+        const val UNABLE_TO_ATTACK = "&cYou feel too weak to wield this weapon."
+        const val UNABLE_TO_CONSUME = "&cYou don't know how to properly consume this item."
+        const val UNABLE_TO_CRAFT = "&cYou have no idea what to do with these items."
+        const val UNABLE_TO_FORGE = "&cYou don't know how to enchant this item."
+        const val UNABLE_TO_ARMOR = "&cYou feel to weak to support this armor."
+    }
 }

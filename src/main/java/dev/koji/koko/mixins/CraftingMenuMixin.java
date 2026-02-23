@@ -1,6 +1,7 @@
 package dev.koji.koko.mixins;
 
 import dev.koji.koko.common.events.PlayerEventHandler;
+import dev.koji.koko.common.helpers.MainHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -26,11 +27,11 @@ public abstract class CraftingMenuMixin {
         if (level.isClientSide) return;
 
         if (!PlayerEventHandler.INSTANCE.isItemBlockedFor(
-                player, resultContainer.getItem(0), PlayerEventHandler.BlockScope.CRAFT
+                player, resultContainer.getItem(0), PlayerEventHandler.PlayerBlockScope.CRAFT
         )) return;
 
         resultContainer.setItem(0, ItemStack.EMPTY);
 
-        PlayerEventHandler.INSTANCE.triggerMessage(player, PlayerEventHandler.EventMessage.UNABLE_TO_CRAFT);
+        MainHelper.INSTANCE.sendMessageToPlayer(player, PlayerEventHandler.DefaultPlayerMessages.UNABLE_TO_CRAFT);
     }
 }

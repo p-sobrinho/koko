@@ -1,8 +1,8 @@
-package dev.koji.koko.common.ktx
+package dev.koji.koko.common.helpers
 
 import net.minecraft.network.codec.StreamCodec
 
-object StreamCodecKTX {
+object StreamHelper {
     fun <B, C, T1, T2, T3, T4, T5, T6, T7, T8> composite(
         streamCodec1: StreamCodec<in B, T1>, method1: (C) -> T1,
         streamCodec2: StreamCodec<in B, T2>, method2: (C) -> T2,
