@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.ironspells.IronSpellsCompact
-import dev.koji.koko.common.compact.ironspells.effects.filters.SpellInscribeSkillEffectFilter
+import dev.koji.koko.common.compact.ironspells.effects.filters.SpellCastSkillEffectFilter
 import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
@@ -36,16 +36,16 @@ class SpellCastSkillEffect(
     }
 
     override fun apply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
-        val filter = applier.filter as? SpellInscribeSkillEffectFilter ?: return
+        val filter = applier.filter as? SpellCastSkillEffectFilter ?: return
 
         IronSpellsCompact.addBlockedSpell(
-            player.uuid, MainHelper.safeParseResource(spell), filter.spellLevel,  IronSpellsCompact.ISSBlockScope.SPELL
+            player.uuid, MainHelper.safeParseResource(spell), filter.spellLevel,  IronSpellsCompact.ISSBlockScope.CAST
         )
     }
 
     override fun unApply(applier: SkillsHandler.SkillEffectApplier, player: Player) {
         IronSpellsCompact.removeBlockedSpell(
-            player.uuid, MainHelper.safeParseResource(spell), IronSpellsCompact.ISSBlockScope.SPELL
+            player.uuid, MainHelper.safeParseResource(spell), IronSpellsCompact.ISSBlockScope.CAST
         )
     }
 

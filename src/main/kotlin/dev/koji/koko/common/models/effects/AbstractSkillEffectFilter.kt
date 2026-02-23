@@ -28,14 +28,14 @@ abstract class AbstractSkillEffectFilter {
 
                     ByteBufCodecs.STRING_UTF8.encode(buf, source.type)
 
-                    val streamCodec = streamCodecsMapper[type]
+                    val streamCodec = streamMapper[type]
                         ?: throw IllegalArgumentException("$type is not supported")
 
                     (streamCodec as StreamCodec<RegistryFriendlyByteBuf, AbstractSkillEffectFilter>).encode(buf, source)
                 },
                 { buf ->
                     val type = ByteBufCodecs.STRING_UTF8.decode(buf)
-                    val codec = streamCodecsMapper[type] ?: throw IllegalArgumentException("Illegal source type: $type")
+                    val codec = streamMapper[type] ?: throw IllegalArgumentException("Illegal source type: $type")
 
                     codec.decode(buf)
                 }
@@ -48,7 +48,7 @@ abstract class AbstractSkillEffectFilter {
             Filters.BLOCKED to BlockedSkillEffectFilter.CODEC
         )
 
-        val streamCodecsMapper = mutableMapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
+        val streamMapper = mutableMapOf<String, StreamCodec<RegistryFriendlyByteBuf, out AbstractSkillEffectFilter>>(
             Filters.ABOVE to AboveSkillEffectFilter.STREAM_CODEC,
             Filters.RANGE to RangeSkillEffectFilter.STREAM_CODEC,
             Filters.BELLOW to BellowSkillEffectFilter.STREAM_CODEC,

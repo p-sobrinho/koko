@@ -1,12 +1,16 @@
 package dev.koji.koko.common.compact.ironspells
 
+import dev.koji.koko.Koko
 import dev.koji.koko.common.SkillsHandler
 import dev.koji.koko.common.compact.ironspells.effects.SpellCastSkillEffect
 import dev.koji.koko.common.compact.ironspells.effects.SpellInscribeSkillEffect
+import dev.koji.koko.common.compact.ironspells.effects.filters.SpellCastSkillEffectFilter
+import dev.koji.koko.common.compact.ironspells.effects.filters.SpellInscribeSkillEffectFilter
 import dev.koji.koko.common.compact.ironspells.sources.SpellCastSource
 import dev.koji.koko.common.compact.ironspells.sources.SpellInscribeSource
 import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
+import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
 import io.redspace.ironsspellbooks.api.events.InscribeSpellEvent
@@ -25,13 +29,15 @@ object IronSpellsCompact {
     fun onSpellPreCast(event: SpellPreCastEvent) {
         val player = event.entity
 
+        Koko.LOGGER.info(event.spellId)
         val spellData = SpellData(MainHelper.safeParseResource(event.spellId), event.spellLevel, false)
 
-        if (!this.isSpellBlockedFor(player, spellData, ISSBlockScope.SPELL)) return
+        if (!this.isSpellBlockedFor(player, spellData, ISSBlockScope.CAST)) return
 
         event.isCanceled = true
 
-        if (!player.level().isClientSide) return
+        // Looks like this event will never fire in client.
+        // if (!player.level().isClientSide) return
 
         MainHelper.sendMessageToPlayer(player, DefaultIronMessages.UNABLE_TO_CAST)
     }
@@ -48,7 +54,8 @@ object IronSpellsCompact {
         if (this.isSpellBlockedFor(player, event.spellData, ISSBlockScope.INSCRIBE)) {
             event.isCanceled = true
 
-            if (!player.level().isClientSide) return
+            // Looks like this event will never fire in client.
+            // if (!player.level().isClientSide) return
 
             MainHelper.sendMessageToPlayer(player, DefaultIronMessages.UNABLE_TO_INSCRIBE)
 
@@ -185,6 +192,18 @@ object IronSpellsCompact {
 
         AbstractSkillEffect.codecMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.CODEC
         AbstractSkillEffect.streamMapper[Effects.PLAYER_SPELL_INSCRIBE] = SpellInscribeSkillEffect.STREAM_CODEC
+
+        AbstractSkillEffectFilter.codecsMapper[EffectsFilters.PLAYER_SPELL_CAST_FILTER] =
+            SpellCastSkillEffectFilter.CODEC
+
+        AbstractSkillEffectFilter.codecsMapper[EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER] =
+            SpellInscribeSkillEffectFilter.CODEC
+
+        AbstractSkillEffectFilter.streamMapper[EffectsFilters.PLAYER_SPELL_CAST_FILTER] =
+            SpellCastSkillEffectFilter.STREAM_CODEC
+
+        AbstractSkillEffectFilter.streamMapper[EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER] =
+            SpellInscribeSkillEffectFilter.STREAM_CODEC
     }
 
 
@@ -201,7 +220,7 @@ object IronSpellsCompact {
 
     data class BlockedSpell(val location: ResourceLocation, val level: Int, val scopes: MutableSet<ISSBlockScope>)
 
-    enum class ISSBlockScope { SPELL, INSCRIBE }
+    enum class ISSBlockScope { CAST, INSCRIBE }
 
     object Sources {
         const val PLAYER_SPELL_CAST = "player/ispell_cast"
@@ -210,7 +229,12 @@ object IronSpellsCompact {
 
     object Effects {
         const val PLAYER_SPELL_CAST = "player/ispell_precast"
-        const val PLAYER_SPELL_INSCRIBE = "player/ispell_preinscribe"
+        const val PLAYER_SPELL_INSCRIBE = "player/ispell_inscribe"
+    }
+
+    object EffectsFilters {
+        const val PLAYER_SPELL_CAST_FILTER = "player/ispell_precast_filter"
+        const val PLAYER_SPELL_INSCRIBE_FILTER = "player/ispell_inscribe_filter"
     }
 
     object DefaultIronMessages {

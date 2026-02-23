@@ -3,6 +3,7 @@ package dev.koji.koko.common.compact.ironspells.effects.filters
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import dev.koji.koko.common.compact.ironspells.IronSpellsCompact
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
 import dev.koji.koko.common.models.effects.Filters
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -12,9 +13,9 @@ import net.minecraft.network.codec.StreamCodec
 class SpellInscribeSkillEffectFilter(
     val spellLevel: Int, val level: Int
 ): AbstractSkillEffectFilter() {
-    override val type: String = Filters.ABOVE
+    override val type: String = IronSpellsCompact.EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER
 
-    override fun apply(level: Int): Boolean = (level >= this.level)
+    override fun apply(level: Int): Boolean = (this.level > level)
 
     companion object {
         val CODEC: MapCodec<SpellInscribeSkillEffectFilter> = RecordCodecBuilder.mapCodec { instance ->
