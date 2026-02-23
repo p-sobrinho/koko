@@ -233,7 +233,12 @@ object PlayerEventHandler {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
         for (listener in listeners) {
-            val xp = this.playerActionEvaluate(listener.sourceData, item)
+            val skillSource = listener.sourceData
+
+            val xp = if (skillSource.alwaysApply)
+                skillSource.alwaysValue
+            else
+                this.playerActionEvaluate(listener.sourceData, item)
 
             if (xp == 0.0) continue
 

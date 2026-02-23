@@ -11,21 +11,22 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 
 class PlayerDiedSource(
-    override val filters: List<SkillSourceFilter>,
-    override val alwaysApply: Boolean
+    override val filters: List<SkillSourceFilter>, override val alwaysApply: Boolean, override val alwaysValue: Double
 ) : AbstractSkillSource() {
     override val type: String = Sources.PLAYER_DIED
     companion object {
         val CODEC: MapCodec<PlayerDiedSource> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                SkillSourceFilter.CODEC.listOf().fieldOf("filters").forGetter(PlayerDiedSource::filters),
-                Codec.BOOL.optionalFieldOf("alwaysApply", false).forGetter(PlayerDiedSource::alwaysApply)
+                SkillSourceFilter.CODEC.listOf().fieldOf("filters").forGetter { it.filters },
+                Codec.BOOL.optionalFieldOf("alwaysApply", false).forGetter { it.alwaysApply },
+                Codec.DOUBLE.optionalFieldOf("alwaysValue", 0.0).forGetter { it.alwaysValue }
             ).apply(instance, ::PlayerDiedSource)
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, PlayerDiedSource> = StreamCodec.composite(
-            SkillSourceFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), PlayerDiedSource::filters,
-            ByteBufCodecs.BOOL, PlayerDiedSource::alwaysApply,
+            SkillSourceFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), { it.filters },
+            ByteBufCodecs.BOOL, { it.alwaysApply },
+            ByteBufCodecs.DOUBLE, { it.alwaysValue },
             ::PlayerDiedSource
         )
     }

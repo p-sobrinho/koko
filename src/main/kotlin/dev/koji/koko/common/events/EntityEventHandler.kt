@@ -89,7 +89,12 @@ object EntityEventHandler {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
         for (listener in listeners) {
-            val xp = this.entityEvaluate(listener.sourceData, entity)
+            val skillSource = listener.sourceData
+
+            val xp = if (skillSource.alwaysApply)
+                skillSource.alwaysValue
+            else
+                this.entityEvaluate(listener.sourceData, entity)
 
             if (xp == 0.0) continue
 

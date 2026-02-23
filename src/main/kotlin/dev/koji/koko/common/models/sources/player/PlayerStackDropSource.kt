@@ -11,21 +11,22 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 
 class PlayerStackDropSource(
-    override val filters: List<SkillSourceFilter>,
-    override val alwaysApply: Boolean
+    override val filters: List<SkillSourceFilter>, override val alwaysApply: Boolean, override val alwaysValue: Double
 ) : AbstractSkillSource() {
     override val type: String = Sources.PLAYER_STACK_DROP
     companion object {
         val CODEC: MapCodec<PlayerStackDropSource> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
-                SkillSourceFilter.CODEC.listOf().fieldOf("filters").forGetter(PlayerStackDropSource::filters),
-                Codec.BOOL.optionalFieldOf("alwaysApply", false).forGetter(PlayerStackDropSource::alwaysApply)
+                SkillSourceFilter.CODEC.listOf().fieldOf("filters").forGetter { it.filters },
+                Codec.BOOL.optionalFieldOf("alwaysApply", false).forGetter { it.alwaysApply },
+                Codec.DOUBLE.optionalFieldOf("alwaysValue", 0.0).forGetter { it.alwaysValue }
             ).apply(instance, ::PlayerStackDropSource)
         }
 
         val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, PlayerStackDropSource> = StreamCodec.composite(
-            SkillSourceFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), PlayerStackDropSource::filters,
-            ByteBufCodecs.BOOL, PlayerStackDropSource::alwaysApply,
+            SkillSourceFilter.STREAM_CODEC.apply(ByteBufCodecs.list()), { it.filters },
+            ByteBufCodecs.BOOL, { it.alwaysApply },
+            ByteBufCodecs.DOUBLE, { it.alwaysValue },
             ::PlayerStackDropSource
         )
     }

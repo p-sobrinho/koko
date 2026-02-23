@@ -141,7 +141,12 @@ object IronSpellsCompact {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
         for (listener in listeners) {
-            val xp = this.playerSpellEvaluate(listener.sourceData, spell)
+            val skillSource = listener.sourceData
+
+            val xp = if (skillSource.alwaysApply)
+                skillSource.alwaysValue
+            else
+                this.playerSpellEvaluate(listener.sourceData, spell)
 
             if (xp == 0.0) continue
 

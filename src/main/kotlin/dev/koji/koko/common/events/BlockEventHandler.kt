@@ -49,7 +49,12 @@ object BlockEventHandler {
         val listeners = SkillsHandler.getListenersFor(source, player.level())
 
         for (listener in listeners) {
-            val xp = this.blockEvaluate(listener.sourceData, blockState)
+            val skillSource = listener.sourceData
+
+            val xp = if (skillSource.alwaysApply)
+                skillSource.alwaysValue
+            else
+                this.blockEvaluate(listener.sourceData, blockState)
 
             if (xp == 0.0) continue
 

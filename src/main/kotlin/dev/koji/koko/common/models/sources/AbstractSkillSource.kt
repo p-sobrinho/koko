@@ -16,6 +16,8 @@ import net.minecraft.network.codec.StreamCodec
 abstract class AbstractSkillSource {
     abstract val filters: List<SkillSourceFilter>
     abstract val alwaysApply: Boolean
+
+    abstract val alwaysValue: Double
     abstract val type: String
 
     companion object {
