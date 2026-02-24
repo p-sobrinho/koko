@@ -15,7 +15,7 @@ object MainHelper {
 
         MESSAGES_COOLDOWNS[message] = Instant.now().plusSeconds(1)
 
-        player.sendSystemMessage(Component.literal(message))
+        player.sendSystemMessage(Component.translatable(message))
     }
 
     fun safeParseResource(resource: String, allowTag: Boolean = true): ResourceLocation {

@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.koji.koko.common.compact.ironspells.IronSpellsCompact
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
-import dev.koji.koko.common.models.effects.Filters
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
@@ -13,7 +12,7 @@ import net.minecraft.network.codec.StreamCodec
 class SpellCastSkillEffectFilter(
     val spellLevel: Int, val level: Int
 ): AbstractSkillEffectFilter() {
-    override val type: String = IronSpellsCompact.EffectsFilters.PLAYER_SPELL_CAST_FILTER
+    override val type: String = IronSpellsCompact.Filters.PLAYER_SPELL_CAST_FILTER
 
     override fun apply(level: Int): Boolean = (this.level > level)
 

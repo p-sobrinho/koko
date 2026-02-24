@@ -1,5 +1,14 @@
 {
   "ui.koko.player_skills_text": "Your Skills",
   "keys.koko.category": "Koko",
-  "keys.koko.skills": "Open Skills"
+  "keys.koko.skills": "Open Skills",
+  "messages.koko.unable_to_use": "§cYou don't know how to use this item.",
+  "messages.koko.unable_to_attack": "§cYou feel too weak to wield this weapon.",
+  "messages.koko.unable_to_consume": "§cYou don't know how to properly consume this item.",
+  "messages.koko.unable_to_craft": "§cYou have no idea what to do with these items.",
+  "messages.koko.unable_to_forge": "§cYou don't know how to enchant this item.",
+  "messages.koko.unable_to_armor": "§cYou feel to weak to support this armor.",
+  "messages.koko.curios_unable_to_wear": "§cYou aren't worth of using this curio.",
+  "messages.koko.iss_unable_to_use": "§cYou don't feel ready to cast this spell.",
+  "messages.koko.iss_unable_to_inscribe": "§cYour knowledge is too poor to this spell."
 }

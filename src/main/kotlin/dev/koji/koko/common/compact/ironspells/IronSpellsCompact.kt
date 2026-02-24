@@ -1,12 +1,13 @@
 package dev.koji.koko.common.compact.ironspells
 
+import dev.koji.koko.KokoConfig
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.Translatables
 import dev.koji.koko.common.compact.ironspells.effects.SpellCastSkillEffect
 import dev.koji.koko.common.compact.ironspells.effects.SpellInscribeSkillEffect
 import dev.koji.koko.common.compact.ironspells.effects.filters.SpellCastSkillEffectFilter
 import dev.koji.koko.common.compact.ironspells.effects.filters.SpellInscribeSkillEffectFilter
 import dev.koji.koko.common.compact.ironspells.sources.SpellCastSource
-import dev.koji.koko.common.compact.ironspells.sources.SpellInscribeSource
 import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.effects.AbstractSkillEffect
 import dev.koji.koko.common.models.effects.AbstractSkillEffectFilter
@@ -189,22 +190,22 @@ object IronSpellsCompact {
         AbstractSkillSource.registerCodec(Sources.PLAYER_SPELL_CAST, SpellCastSource.CODEC)
         AbstractSkillEffect.registerCodec(Effects.PLAYER_SPELL_CAST, SpellCastSkillEffect.CODEC)
         AbstractSkillEffectFilter
-            .registerCodec(EffectsFilters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.CODEC)
+            .registerCodec(Filters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.CODEC)
 
         AbstractSkillSource.registerCodec(Sources.PLAYER_SPELL_INSCRIBE, SpellCastSource.CODEC)
         AbstractSkillEffect.registerCodec(Effects.PLAYER_SPELL_INSCRIBE, SpellInscribeSkillEffect.CODEC)
         AbstractSkillEffectFilter
-            .registerCodec(EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.CODEC)
+            .registerCodec(Filters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.CODEC)
 
         AbstractSkillSource.registerStream(Sources.PLAYER_SPELL_CAST, SpellCastSource.STREAM_CODEC)
         AbstractSkillEffect.registerStream(Effects.PLAYER_SPELL_CAST, SpellCastSkillEffect.STREAM_CODEC)
         AbstractSkillEffectFilter
-            .registerStream(EffectsFilters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.STREAM_CODEC)
+            .registerStream(Filters.PLAYER_SPELL_CAST_FILTER, SpellCastSkillEffectFilter.STREAM_CODEC)
 
         AbstractSkillSource.registerStream(Sources.PLAYER_SPELL_INSCRIBE, SpellCastSource.STREAM_CODEC)
         AbstractSkillEffect.registerStream(Effects.PLAYER_SPELL_INSCRIBE, SpellInscribeSkillEffect.STREAM_CODEC)
         AbstractSkillEffectFilter
-            .registerStream(EffectsFilters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.STREAM_CODEC)
+            .registerStream(Filters.PLAYER_SPELL_INSCRIBE_FILTER, SpellInscribeSkillEffectFilter.STREAM_CODEC)
     }
 
 
@@ -233,13 +234,16 @@ object IronSpellsCompact {
         const val PLAYER_SPELL_INSCRIBE = "player/ispell_inscribe"
     }
 
-    object EffectsFilters {
+    object Filters {
         const val PLAYER_SPELL_CAST_FILTER = "player/ispell_precast_filter"
         const val PLAYER_SPELL_INSCRIBE_FILTER = "player/ispell_inscribe_filter"
     }
 
     object DefaultIronMessages {
-        const val UNABLE_TO_CAST = "§cYou don't feel ready to cast this spell."
-        const val UNABLE_TO_INSCRIBE = "§cYour knowledge is too poor to this spell."
+        val UNABLE_TO_CAST = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_ISS_UNABLE_TO_CAST]?.get()
+            ?: Translatables.MESSAGES_ISS_UNABLE_TO_CAST
+
+        val UNABLE_TO_INSCRIBE = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_ISS_UNABLE_TO_INSCRIBE]?.get()
+            ?: Translatables.MESSAGES_ISS_UNABLE_TO_INSCRIBE
     }
 }

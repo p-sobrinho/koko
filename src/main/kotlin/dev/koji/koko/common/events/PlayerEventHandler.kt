@@ -1,6 +1,8 @@
 package dev.koji.koko.common.events
 
+import dev.koji.koko.KokoConfig
 import dev.koji.koko.common.SkillsHandler
+import dev.koji.koko.common.Translatables
 import dev.koji.koko.common.helpers.MainHelper
 import dev.koji.koko.common.models.sources.AbstractSkillSource
 import dev.koji.koko.common.models.sources.SkillSourceFilter
@@ -364,11 +366,22 @@ object PlayerEventHandler {
     enum class PlayerBlockScope { USE, ATTACK, CONSUME, CRAFT, FORGE, ARMOR, CURIOS, ISPELL }
 
     object DefaultPlayerMessages {
-        const val UNABLE_TO_USE = "§cYou don't know how to use this item."
-        const val UNABLE_TO_ATTACK = "§cYou feel too weak to wield this weapon."
-        const val UNABLE_TO_CONSUME = "§cYou don't know how to properly consume this item."
-        const val UNABLE_TO_CRAFT = "§cYou have no idea what to do with these items."
-        const val UNABLE_TO_FORGE = "§cYou don't know how to enchant this item."
-        const val UNABLE_TO_ARMOR = "§cYou feel to weak to support this armor."
+        val UNABLE_TO_USE = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_USE]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_USE
+
+        val UNABLE_TO_ATTACK = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_ATTACK]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_ATTACK
+
+        val UNABLE_TO_CONSUME = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_CONSUME]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_CONSUME
+
+        val UNABLE_TO_CRAFT = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_CRAFT]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_CRAFT
+
+        val UNABLE_TO_FORGE = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_FORGE]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_FORGE
+
+        val UNABLE_TO_ARMOR = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_UNABLE_TO_ARMOR]?.get()
+            ?: Translatables.MESSAGES_UNABLE_TO_ARMOR
     }
 }

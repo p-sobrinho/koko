@@ -1,5 +1,7 @@
 package dev.koji.koko.common.compact.curios
 
+import dev.koji.koko.KokoConfig
+import dev.koji.koko.common.Translatables
 import dev.koji.koko.common.compact.curios.effects.CuriosEquipSkillEffect
 import dev.koji.koko.common.compact.curios.sources.CuriosTickSource
 import dev.koji.koko.common.events.PlayerEventHandler
@@ -82,6 +84,7 @@ object CuriosCompact {
     }
 
     object DefaultCuriosMessages {
-        const val UNABLE_TO_WEAR = "§cYou aren't worth of using this curio."
+        val UNABLE_TO_WEAR = KokoConfig.MESSAGES_CONFIG[Translatables.MESSAGES_CURIOS_UNABLE_TO_WEAR]?.get()
+            ?: Translatables.MESSAGES_CURIOS_UNABLE_TO_WEAR
     }
 }

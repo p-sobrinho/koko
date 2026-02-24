@@ -32,6 +32,8 @@ public abstract class CraftingMenuMixin {
 
         resultContainer.setItem(0, ItemStack.EMPTY);
 
-        MainHelper.INSTANCE.sendMessageToPlayer(player, PlayerEventHandler.DefaultPlayerMessages.UNABLE_TO_CRAFT);
+        MainHelper.INSTANCE.sendMessageToPlayer(
+                player, PlayerEventHandler.DefaultPlayerMessages.INSTANCE.getUNABLE_TO_CRAFT()
+        );
     }
 }
